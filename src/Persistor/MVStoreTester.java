@@ -26,7 +26,7 @@ public class MVStoreTester {
 
                         //store.setReuseSpace(true);
 
-        MVMap<Integer, Stupid> mappy = store.openMap("mymap", new MVMap.Builder<Integer, Stupid>().keyType(new ObjectDataType()).valueType(Stupid.INSTANCE));
+        MVMap<Integer, FooObject> mappy = store.openMap("mymap", new MVMap.Builder<Integer, FooObject>().keyType(new ObjectDataType()).valueType(FooObject.INSTANCE));
 
         if(arg.length > 0) {
 
@@ -34,22 +34,22 @@ public class MVStoreTester {
             System.out.println("writing 500 000 objects to disk");
             long start0 = System.currentTimeMillis();
 
-            Stupid stupid = null;
+            FooObject stupid = null;
             for (int i = 0; i < 500000; i++) {
 
                 if (i == 9999) {
 
-                    stupid = new Stupid(random.nextInt(10000000), random.nextInt(10000000));
-                    stupid.stringList.add("hello azz!");
-                    stupid.stringList.add("die!");
+                    stupid = new FooObject(random.nextInt(10000000), random.nextInt(10000000));
+                    stupid.stringList.add("added 0");
+                    stupid.stringList.add("added 1");
                 } else {
 
-                    stupid = new Stupid(random.nextInt(10000000), random.nextInt(10000000));
+                    stupid = new FooObject(random.nextInt(10000000), random.nextInt(10000000));
 
 
                 }
 
-                //   byte[] serializedStupid = Persistor.StupidSerializer.getBytes( stupid );
+                //   byte[] serializedStupid = Persistor.FooObjectSerializer.getBytes( stupid );
 
 
 
@@ -76,7 +76,7 @@ public class MVStoreTester {
 
         for(int i=0; i<100000; i++) {
 
-           Stupid tester =  mappy.get(random.nextInt(400000));
+           FooObject tester =  mappy.get(random.nextInt(400000));
 
         }
 

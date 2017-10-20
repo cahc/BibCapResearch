@@ -12,9 +12,9 @@ import java.util.List;
 /**
  * Created by Cristian on 2017-10-17.
  */
-public class Stupid implements DataType,Serializable, Comparable<Stupid> {
+public class FooObject implements DataType,Serializable, Comparable<FooObject> {
 
-    public static final Stupid INSTANCE = new Stupid();
+    public static final FooObject INSTANCE = new FooObject();
 
 
     int a;
@@ -23,9 +23,9 @@ public class Stupid implements DataType,Serializable, Comparable<Stupid> {
     List<String> stringList;
 
 
-    public Stupid() { }
+    public FooObject() { }
 
-    public Stupid(int a, int b) {
+    public FooObject(int a, int b) {
 
         this.a = a;
         this.b = b;
@@ -35,7 +35,7 @@ public class Stupid implements DataType,Serializable, Comparable<Stupid> {
     }
 
     @Override
-    public int compareTo(Stupid o) {
+    public int compareTo(FooObject o) {
 
         if(this.a < this.b) return -1;
         if(this.b < this.a) return  1;
@@ -50,7 +50,7 @@ public class Stupid implements DataType,Serializable, Comparable<Stupid> {
     @Override
     public int compare(java.lang.Object a, java.lang.Object b) {
 
-       return ((Stupid)a).compareTo((Stupid)b);
+       return ((FooObject)a).compareTo((FooObject)b);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class Stupid implements DataType,Serializable, Comparable<Stupid> {
     @Override
     public void write(WriteBuffer buff, java.lang.Object obj) {
 
-        byte[] serialized = StupidSerializer.getBytes( (Stupid)obj );
+        byte[] serialized = FooObjectSerializer.getBytes( (FooObject)obj );
         buff.putVarInt(serialized.length).put(serialized);
 
 
@@ -80,7 +80,7 @@ public class Stupid implements DataType,Serializable, Comparable<Stupid> {
     }
 
     @Override
-    public Stupid read(ByteBuffer buff) {
+    public FooObject read(ByteBuffer buff) {
 
      //   System.out.println("I am deserializing!");
 
@@ -99,7 +99,7 @@ public class Stupid implements DataType,Serializable, Comparable<Stupid> {
           //  System.out.println("YES: " + serialized[i]);
         }
 
-        return StupidSerializer.getObject(serialized);
+        return FooObjectSerializer.getObject(serialized);
 
     }
 
