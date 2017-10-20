@@ -1,9 +1,5 @@
 package BibCap;
 
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.*;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -226,7 +222,7 @@ public class BibCapParser {
             String UT = splitted[0];
             CitationInformation cit = new CitationInformation();
             cit.citIncludingSelf = Integer.valueOf( splitted[1] );
-            cit.citExclusingSelf = Integer.valueOf (splitted[3]  );
+            cit.citExcludingSelf = Integer.valueOf (splitted[3]  );
 
             UTtoCitationInformation.put(UT, cit);
 
@@ -253,7 +249,7 @@ public class BibCapParser {
 
 
                 bibCapRecord.setCitationsIncSelf( citationInformation.citIncludingSelf );
-                bibCapRecord.setCitationsExclSelf( citationInformation.citExclusingSelf );
+                bibCapRecord.setCitationsExclSelf( citationInformation.citExcludingSelf);
                 bibCapRecord.setConsideredRecord(true);
                 countConsideredArticles.add( bibCapRecord.internalId );
 
@@ -295,7 +291,7 @@ public class BibCapParser {
     private class CitationInformation {
 
         int citIncludingSelf;
-        int citExclusingSelf;
+        int citExcludingSelf;
 
 
     }
