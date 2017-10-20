@@ -35,7 +35,7 @@ public class BibCapRecord implements Serializable{
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" +citedReferences +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + citedReferences +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
 
     }
 
@@ -83,6 +83,12 @@ public class BibCapRecord implements Serializable{
 
         citedReferences.add(s);
     }
+
+    public int getNrCitedReferences() {
+
+        return this.citedReferences.size();
+    }
+
 
     public void createFullAbstract() {
 
