@@ -48,8 +48,8 @@ public class XodusTester {
             if (i == 9999) {
 
                 stupid = new Stupid(random.nextInt(10000000), random.nextInt(10000000));
-                stupid.stringList.add("hello azz!");
-                stupid.stringList.add("die!");
+                stupid.stringList.add("added 1");
+                stupid.stringList.add("added 2");
             } else {
 
                 stupid = new Stupid(random.nextInt(10000000), random.nextInt(10000000));
