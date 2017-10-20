@@ -15,7 +15,7 @@ public class XodusTester {
 
 
     public static void main(String[] arg) throws InterruptedException {
-        
+
         Random random = new Random();
 
         EnvironmentConfig config = new EnvironmentConfig().
