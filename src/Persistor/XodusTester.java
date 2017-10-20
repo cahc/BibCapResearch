@@ -42,17 +42,17 @@ public class XodusTester {
         System.out.println("writing 500 000 objects to disk");
         long start0 = System.currentTimeMillis();
 
-        Stupid stupid = null;
+        FooObject stupid = null;
         for (int i = 0; i < 500000; i++) {
 
             if (i == 9999) {
 
-                stupid = new Stupid(random.nextInt(10000000), random.nextInt(10000000));
+                stupid = new FooObject(random.nextInt(10000000), random.nextInt(10000000));
                 stupid.stringList.add("added 1");
                 stupid.stringList.add("added 2");
             } else {
 
-                stupid = new Stupid(random.nextInt(10000000), random.nextInt(10000000));
+                stupid = new FooObject(random.nextInt(10000000), random.nextInt(10000000));
 
 
             }
@@ -60,7 +60,7 @@ public class XodusTester {
             txn = environment.beginTransaction();
 
 
-          store.put(txn, IntegerBinding.intToCompressedEntry(i), StupidSerializer.getByteIterable(stupid) );
+          store.put(txn, IntegerBinding.intToCompressedEntry(i), FooObjectSerializer.getByteIterable(stupid) );
 
           txn.commit();
 
@@ -83,7 +83,7 @@ public class XodusTester {
 
             txn = environment.beginTransaction();
 
-            Stupid tester =  StupidSerializer.getObject(  store.get(txn, IntegerBinding.intToCompressedEntry(i)) );
+            FooObject tester =  FooObjectSerializer.getObject(  store.get(txn, IntegerBinding.intToCompressedEntry(i)) );
             txn.commit();
 
             if(i==9999) {

@@ -1,7 +1,5 @@
 package BibCap;
 
-import Persistor.Stupid;
-import Persistor.StupidSerializer;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import org.nustaq.serialization.FSTConfiguration;
