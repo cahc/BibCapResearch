@@ -1,0 +1,4 @@
+org.h2.mvstore
+org.h2.mvstore.cache
+org.h2.mvstore.rtree
+org.h2.mvstore.type
