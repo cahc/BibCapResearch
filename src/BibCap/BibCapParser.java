@@ -101,6 +101,9 @@ public class BibCapParser {
         firstline = true;
         HashSet<Integer> countRecordsWitAbstract = new HashSet<>();
 
+        int idOfCurrentFetechedDoc = -99;
+        BibCapRecord bibCapRecord = null;
+
         while ((line = reader.readLine()) != null) {
             if (firstline) {
                 firstline = false;
@@ -114,9 +117,16 @@ public class BibCapParser {
             countRecordsWitAbstract.add(id);
             String text = splitted[1];
 
-            BibCapRecord biBCapRecord = bibCapRecordStore.getRecord(id);
-            biBCapRecord.addPartOfAbstract(text);
+            if(idOfCurrentFetechedDoc == id) {
 
+                bibCapRecord.addPartOfAbstract(text);
+
+            } else {
+
+                bibCapRecord = bibCapRecordStore.getRecord(id);
+                bibCapRecord.addPartOfAbstract(text);
+                idOfCurrentFetechedDoc = id;
+            }
 
 
         }
@@ -145,6 +155,11 @@ public class BibCapParser {
 
         BufferedWriter badReferencesWriter= new BufferedWriter( new FileWriter( new File("badReferences.txt")));
         int badRefCount = 0;
+
+        idOfCurrentFetechedDoc = -99;
+        bibCapRecord = null;
+
+
         while ((line = reader.readLine()) != null) {
             if (firstline) {
                 firstline = false;
@@ -154,7 +169,7 @@ public class BibCapParser {
 
             String[] splitted = line.split("\t");
             Integer id = Integer.valueOf(splitted[0]);
-            BibCapRecord biBCapRecord = bibCapRecordStore.getRecord(id);
+
 
             String cited_author = splitted[5];
             String cited_year = splitted[6];
@@ -180,9 +195,20 @@ public class BibCapParser {
 
                 if(m.find()) {
 
-                    biBCapRecord.addCitedReferenceString(m.group(0).trim() );
-                    countRecordsWitRef.add(id);
+                    if(idOfCurrentFetechedDoc == id) {
 
+                        bibCapRecord.addCitedReferenceString(m.group(0).trim());
+                        countRecordsWitRef.add(id);
+
+                    } else {
+
+
+                        bibCapRecord = bibCapRecordStore.getRecord(id);
+                        bibCapRecord.addCitedReferenceString(m.group(0).trim());
+                        countRecordsWitRef.add(id);
+                        idOfCurrentFetechedDoc = id;
+
+                    }
 
 
                 } else {
@@ -191,7 +217,24 @@ public class BibCapParser {
 
                 }
 
-            } else {  biBCapRecord.addCitedReferenceString(citedString.toString().trim());   countRecordsWitRef.add(id);}
+            } else {
+
+                if(idOfCurrentFetechedDoc == id) {
+                    bibCapRecord.addCitedReferenceString(citedString.toString().trim());
+                    countRecordsWitRef.add(id);
+
+
+                } else {
+
+                    bibCapRecord = bibCapRecordStore.getRecord(id);
+                    bibCapRecord.addCitedReferenceString(citedString.toString().trim());
+                    countRecordsWitRef.add(id);
+                    idOfCurrentFetechedDoc = id;
+
+
+                }
+
+            }
 
 
         }
@@ -235,7 +278,7 @@ public class BibCapParser {
         HashSet<Integer> countConsideredArticles = new HashSet<>();
         for(Map.Entry<Integer, BibCapRecord> entry : bibCapRecordStore.entrySetOfRecords()) {
 
-            BibCapRecord bibCapRecord = entry.getValue();
+            bibCapRecord = entry.getValue();
             String UT = bibCapRecord.getUT();
 
             CitationInformation citationInformation = UTtoCitationInformation.get(UT);
