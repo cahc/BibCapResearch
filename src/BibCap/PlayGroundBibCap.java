@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Created by crco0001 on 10/11/2017.
@@ -21,10 +22,10 @@ public class PlayGroundBibCap {
 
 
         //on disk
-        BibCapRecordStoreMVStore recordStore = new BibCapRecordStoreMVStore();
+       // BibCapRecordStoreMVStore recordStore = new BibCapRecordStoreMVStore();
 
         //in memory
-        //BibCapRecordStore recordStore = new BibCapRecordStoreInMemory();
+        BibCapRecordStore recordStore = new BibCapRecordStoreInMemory();
 
         System.out.println("start parsing");
 
@@ -32,17 +33,30 @@ public class PlayGroundBibCap {
 
         System.out.println("Done. That took: " + (System.currentTimeMillis()-start)/1000.0 + ". Now writing to file");
 
-        recordStore.saveChanges();
-        recordStore.compact();
+       //recordStore.saveChanges();
+       //recordStore.compact(); //todo check: memory explodes here!
 
         BufferedWriter writer = new BufferedWriter( new FileWriter( new File("rawOutput.txt") ));
 
         System.out.println("# mappings:  " + recordStore.size());
 
 
+
+        //orderedSet
+        TreeSet<Integer> ids = new TreeSet<>();
+
+
         for (Map.Entry<Integer, BibCapRecord> entry : recordStore.entrySetOfRecords()) {
 
-            BibCapRecord record = entry.getValue();
+                ids.add( entry.getKey() );
+        }
+
+
+        for (Integer key : ids) {
+
+
+            BibCapRecord record = recordStore.getRecord(key);
+
             if(!record.isConsideredRecord()) continue;
 
             writer.write(record.toString());
@@ -53,8 +67,7 @@ public class PlayGroundBibCap {
         writer.flush();
         writer.close();
 
-
-        recordStore.close();
+      // recordStore.close();
     }
 
 

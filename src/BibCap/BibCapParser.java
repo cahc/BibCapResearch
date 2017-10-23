@@ -121,7 +121,12 @@ public class BibCapParser {
 
                 bibCapRecord.addPartOfAbstract(text);
 
+
+
             } else {
+
+                //for persitance store, overwrite
+                if(idOfCurrentFetechedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetechedDoc, bibCapRecord);
 
                 bibCapRecord = bibCapRecordStore.getRecord(id);
                 bibCapRecord.addPartOfAbstract(text);
@@ -139,6 +144,13 @@ public class BibCapParser {
             BibCapRecord record = entry.getValue();
 
             record.createFullAbstract();
+
+            //not supported by mvstore
+           // entry.setValue( record );
+
+            //not allowed?
+            bibCapRecordStore.putRecord(entry.getKey(),record );
+
 
         }
 
@@ -203,6 +215,9 @@ public class BibCapParser {
                     } else {
 
 
+                        if(idOfCurrentFetechedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetechedDoc, bibCapRecord);
+
+                        //now new
                         bibCapRecord = bibCapRecordStore.getRecord(id);
                         bibCapRecord.addCitedReferenceString(m.group(0).trim());
                         countRecordsWitRef.add(id);
@@ -225,6 +240,9 @@ public class BibCapParser {
 
 
                 } else {
+
+                    if(idOfCurrentFetechedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetechedDoc, bibCapRecord);
+
 
                     bibCapRecord = bibCapRecordStore.getRecord(id);
                     bibCapRecord.addCitedReferenceString(citedString.toString().trim());
@@ -288,12 +306,23 @@ public class BibCapParser {
                 bibCapRecord.setConsideredRecord(false);
 
 
+                //not supported by mvstore
+                //entry.setValue(bibCapRecord);
+
+                //not allowed?
+                bibCapRecordStore.putRecord(entry.getKey(),bibCapRecord );
+
             } else {
 
 
                 bibCapRecord.setCitationsIncSelf( citationInformation.citIncludingSelf );
                 bibCapRecord.setCitationsExclSelf( citationInformation.citExcludingSelf);
                 bibCapRecord.setConsideredRecord(true);
+                //entry.setValue(bibCapRecord);
+
+                //not allowed?
+                bibCapRecordStore.putRecord(entry.getKey(),bibCapRecord );
+
                 countConsideredArticles.add( bibCapRecord.internalId );
 
 
