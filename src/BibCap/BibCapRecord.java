@@ -1,13 +1,20 @@
 package BibCap;
 
+import Persistor.FooObject;
+import Persistor.FooObjectSerializer;
+import org.h2.mvstore.DataUtils;
+import org.h2.mvstore.WriteBuffer;
+import org.h2.mvstore.type.DataType;
+
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by crco0001 on 10/11/2017.
  */
-public class BibCapRecord implements Serializable{
+public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRecord> {
 
     //used just in parsing phase
     int internalId;
@@ -159,4 +166,88 @@ public class BibCapRecord implements Serializable{
         result = 31 * result + UT.hashCode();
         return result;
     }
+
+
+
+    @Override
+    public int compareTo(BibCapRecord other) {
+
+
+        if(this.internalId < other.internalId) return -1;
+        if(other.internalId < this.internalId) return 1;
+        if(this.internalId == other.internalId) return 0;
+        return (this.UT.compareTo(other.UT));
+
+
+
+    }
+
+    ///////////////////DataType overid methods//////////////////
+    @Override
+    public int compare(Object a, Object b) {
+
+       return  ((BibCapRecord)a).compareTo( (BibCapRecord)b  );
+
+    }
+
+    @Override
+    public int getMemory(Object obj) {
+
+        return 10000; // todo fix this estimate
+    }
+
+    @Override
+    public void write(WriteBuffer buff, Object obj) {
+
+        byte[] serialized = BibCapRecordSerializer.getBytes( (BibCapRecord) obj );
+        buff.putVarInt(serialized.length).put(serialized);
+
+
+
+    }
+
+    @Override
+    public void write(WriteBuffer buff, Object[] obj, int len, boolean key) {
+
+        for(int i = 0; i < len; ++i) {
+            this.write(buff, obj[i]);
+        }
+
+
+    }
+
+    @Override
+    public Object read(ByteBuffer buff) {
+
+        int length = DataUtils.readVarInt(buff);
+
+        byte[] serialized = new byte[length];
+
+
+        for(int i=0; i<length; i++) {
+
+            serialized[i] = buff.get();
+
+
+        }
+
+        return BibCapRecordSerializer.getObject(serialized);
+
+
+
+    }
+
+    @Override
+    public void read(ByteBuffer buff, Object[] obj, int len, boolean key) {
+
+        for(int i = 0; i < len; ++i) {
+            obj[i] = this.read(buff);
+        }
+
+
+    }
+
+
+    ///////////////////DataType overid methods&//////////////////
+
 }
