@@ -22,10 +22,10 @@ public class PlayGroundBibCap {
 
 
         //on disk
-       // BibCapRecordStoreMVStore recordStore = new BibCapRecordStoreMVStore();
+       BibCapRecordStoreMVStore recordStore = new BibCapRecordStoreMVStore();
 
         //in memory
-        BibCapRecordStore recordStore = new BibCapRecordStoreInMemory();
+        //BibCapRecordStore recordStore = new BibCapRecordStoreInMemory();
 
         System.out.println("start parsing");
 
@@ -33,7 +33,7 @@ public class PlayGroundBibCap {
 
         System.out.println("Done. That took: " + (System.currentTimeMillis()-start)/1000.0 + ". Now writing to file");
 
-       //recordStore.saveChanges();
+       recordStore.saveChanges();
        //recordStore.compact(); //todo check: memory explodes here!
 
         BufferedWriter writer = new BufferedWriter( new FileWriter( new File("rawOutput.txt") ));
@@ -43,17 +43,8 @@ public class PlayGroundBibCap {
 
 
         //orderedSet
-        TreeSet<Integer> ids = new TreeSet<>();
 
-
-        for (Map.Entry<Integer, BibCapRecord> entry : recordStore.entrySetOfRecords()) {
-
-                ids.add( entry.getKey() );
-        }
-
-
-        for (Integer key : ids) {
-
+        for (Integer key : bibCapParser.getKeySet() ) {
 
             BibCapRecord record = recordStore.getRecord(key);
 
@@ -67,7 +58,7 @@ public class PlayGroundBibCap {
         writer.flush();
         writer.close();
 
-      // recordStore.close();
+       recordStore.close();
     }
 
 

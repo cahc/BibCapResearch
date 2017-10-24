@@ -18,6 +18,11 @@ public class BibCapParser {
 
     File citationData;
 
+
+    //for the persistence stores..
+    private final static Set<Integer> orderedKeySet = new TreeSet<Integer>();
+
+
     static final Pattern TAB = Pattern.compile("\t");
     final static Pattern ARKIVX = Pattern.compile(".*?ARXIV.*[0,9]+.*");
 
@@ -42,6 +47,13 @@ public class BibCapParser {
         if(!this.abstracts.exists()) throw new IOException("publFile missing..");
         if(!this.citationData.exists()) throw new IOException("publFile missing..");
 
+
+    }
+
+
+    public Set<Integer> getKeySet() {
+
+       return Collections.unmodifiableSet(orderedKeySet);
 
     }
 
@@ -86,6 +98,8 @@ public class BibCapParser {
             biBCapRecord.setSource(source);
 
             bibCapRecordStore.putRecord(doc_id, biBCapRecord);
+
+            orderedKeySet.add(doc_id);
 
         }
 
@@ -136,23 +150,28 @@ public class BibCapParser {
 
         }
 
+        //last uppdated record may not have been writen to disk
+        bibCapRecordStore.putRecord(idOfCurrentFetechedDoc,bibCapRecord);
+
+
         reader.close();
 
-        for (Map.Entry<Integer, BibCapRecord> entry : bibCapRecordStore.entrySetOfRecords()) {
 
-            //changing values is ok, removing use an iterator
-            BibCapRecord record = entry.getValue();
+
+        for (Integer key : orderedKeySet) {
+
+            BibCapRecord record = bibCapRecordStore.getRecord(key);
 
             record.createFullAbstract();
 
-            //not supported by mvstore
-           // entry.setValue( record );
-
-            //not allowed?
-            bibCapRecordStore.putRecord(entry.getKey(),record );
+            bibCapRecordStore.putRecord(key, record);
 
 
         }
+
+
+
+
 
         System.out.println("Abstracts added to " + countRecordsWitAbstract.size() + " records in pass two");
 
@@ -257,6 +276,10 @@ public class BibCapParser {
 
         }
 
+        //last uppdated record may not have been writen to disk
+        bibCapRecordStore.putRecord(idOfCurrentFetechedDoc,bibCapRecord);
+
+
 
         System.out.println("References added to " + countRecordsWitRef.size() + " records in pass 3");
         System.out.println(badRefCount +" reference ignored: noise, in press etc. See badReferences.txt");
@@ -294,9 +317,15 @@ public class BibCapParser {
 
         System.out.println(UTtoCitationInformation.size() + " UT:s with citation information read, now matching..");
         HashSet<Integer> countConsideredArticles = new HashSet<>();
-        for(Map.Entry<Integer, BibCapRecord> entry : bibCapRecordStore.entrySetOfRecords()) {
 
-            bibCapRecord = entry.getValue();
+
+
+
+
+
+        for(Integer key : orderedKeySet ) {
+
+            bibCapRecord = bibCapRecordStore.getRecord(key);
             String UT = bibCapRecord.getUT();
 
             CitationInformation citationInformation = UTtoCitationInformation.get(UT);
@@ -310,7 +339,7 @@ public class BibCapParser {
                 //entry.setValue(bibCapRecord);
 
                 //not allowed?
-                bibCapRecordStore.putRecord(entry.getKey(),bibCapRecord );
+                bibCapRecordStore.putRecord(key,bibCapRecord );
 
             } else {
 
@@ -321,7 +350,7 @@ public class BibCapParser {
                 //entry.setValue(bibCapRecord);
 
                 //not allowed?
-                bibCapRecordStore.putRecord(entry.getKey(),bibCapRecord );
+                bibCapRecordStore.putRecord(key, bibCapRecord);
 
                 countConsideredArticles.add( bibCapRecord.internalId );
 
@@ -330,6 +359,9 @@ public class BibCapParser {
 
 
         }
+
+
+
 
 
         System.out.println(countConsideredArticles.size() +" records matched = final data set ");
