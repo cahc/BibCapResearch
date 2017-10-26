@@ -50,12 +50,25 @@ public class RAKE {
 
     private final static HashMap<String, String> FREQDICT = Utils.getDictionary("E:\\RDRPOSTagger-master\\Models\\POS\\English.DICT");
 
+    public void getTokens(String input) {
+
+        List<String> tokens = Tokenizer(input);
+
+        for(String s : tokens) {
+
+            System.out.println(s);
+
+        }
+    }
+
     public void getKeyWords(String input) {
 
         List<String> tokens = Tokenizer(input);
 
+
         //pre tagg
         List<WordTag> wordtags = InitialTagger.SimplePreTaggerForEnglish(this.FREQDICT, tokens);
+
 
         //post tagg
 
@@ -67,12 +80,12 @@ public class RAKE {
             System.out.println(wordtags.get(i).word + " " + wordtags.get(i).tag + " " + finaltags.get(i));
 
 
-            if (!wordtags.get(i).tag.equals(finaltags.get(i))) {
+         //   if (!wordtags.get(i).tag.equals(finaltags.get(i))) {
 
                 //System.out.println(wordtags.get(i).word +" " + wordtags.get(i).tag +" " + finaltags.get(i) );
 
                 diff++;
-            }
+           // }
 
         }
 
@@ -107,6 +120,14 @@ public class RAKE {
             start = m.end();
         }
 
+
+        //potential last token
+
+        if(start != input.length()-1 ) {
+
+            tokens.add( input.substring(start,input.length())  );
+
+        }
 
         return tokens;
 
