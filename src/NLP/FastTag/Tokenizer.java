@@ -1,4 +1,4 @@
-package NLP;
+package NLP.FastTag;
 
 // Copyright 2003-2008.  Mark Watson (markw@markwatson.com).  All rights reserved.
 // This software is released under the LGPL (www.fsf.org)

@@ -1,4 +1,4 @@
-package NLP;
+package NLP.FastTag;
 
 // Copyright 2003-2008.  Mark Watson (markw@markwatson.com).  All rights reserved.
 // This software is released under the LGPL (www.fsf.org)
@@ -134,7 +134,7 @@ public class FastTag {
     private static Map<String, String[]> buildLexicon() {
         Map<String, String[]> lexicon = new HashMap<String, String[]>();
         try {
-            InputStream ins = FastTag.class.getClassLoader().getResourceAsStream("lexicon.txt");
+            InputStream ins = FastTag.class.getResourceAsStream("lexicon.txt");
             if (ins == null) {
                 ins = new FileInputStream("data/lexicon.txt");
             }
