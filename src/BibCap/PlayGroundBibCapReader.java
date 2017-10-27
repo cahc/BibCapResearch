@@ -35,24 +35,25 @@ public class PlayGroundBibCapReader {
 
 
 
-
-
-
         //running single thread rake..
 
         RAKE rake = new RAKE();
 
 
-        String test = map.get(14241147).getAbstractText();
-
-        System.out.println(test);
-
-
-        //TODO fix outputs empty/null tokens
-        rake.getTokens(test);
-
-
 /*
+        BibCapRecord record = map.get(14318771);
+
+        System.out.println(record.getTitle());
+        rake.getTokens(record.getTitle());
+
+        System.out.println(record.abstractText);
+
+        rake.getTokens(record.getAbstractText());
+        //TODO fix outputs empty/null tokens
+
+*/
+
+
         for(Map.Entry<Integer,BibCapRecord> entry : map.entrySet()) {
 
 
@@ -65,13 +66,12 @@ public class PlayGroundBibCapReader {
             System.out.println("##########");
             System.out.println(record.internalId + " @@ " +record.getUT() );
 
-            if(title != null) rake.getKeyWords(title);
-            if(summary != null) rake.getKeyWords(summary);
+            if(title != null) rake.getKeyWords(title,false);
+            if(summary != null) rake.getKeyWords(summary,true);
 
         }
 
 
-*/
 
         store.close();
 
