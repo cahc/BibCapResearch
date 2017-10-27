@@ -61,10 +61,15 @@ public class RAKE {
         }
     }
 
-    public void getKeyWords(String input) {
+    public void getKeyWords(String input, boolean cleanAbstractFromCopyright) {
+
+        if(cleanAbstractFromCopyright) {
+
+           input = RemoveCopyRightFromAbstract.cleanedAbstract(input);
+
+        }
 
         List<String> tokens = Tokenizer(input);
-
 
         //pre tagg
         List<WordTag> wordtags = InitialTagger.SimplePreTaggerForEnglish(this.FREQDICT, tokens);
@@ -98,6 +103,7 @@ public class RAKE {
 
     public static List<String> Tokenizer(String input) {
 
+       // System.out.println("String length: " +input.length());
         List<String> tokens = new ArrayList<>();
 
         input = whiteSpaceNormalize(input);
@@ -111,19 +117,28 @@ public class RAKE {
 
             //the seperated by PhraseAmdWordDelimiters
 
-            tokens.add(input.substring(start, m.start()));
+            if(m.start() != 0) { //check so the start of the string isn't a delim
+
+                String token = input.substring(start, m.start());
+
+                tokens.add(token);
+
+            }
 
             Character delim = input.charAt(m.start());
 
             if (!delim.equals(' ')) tokens.add(delim.toString());
 
+        //   System.out.print("start: " + m.start() );
             start = m.end();
+
+        //   System.out.println(" end: " + start +  delim);
         }
 
 
         //potential last token
 
-        if(start != input.length()-1 ) {
+        if(start != input.length() ) {
 
             tokens.add( input.substring(start,input.length())  );
 
@@ -142,7 +157,7 @@ public class RAKE {
 
         RAKE rake = new RAKE();
 
-        rake.getKeyWords(test);
+        rake.getKeyWords(test, false);
 
     }
 
