@@ -14,6 +14,8 @@ public interface BibCapRecordStore {
 
     int size();
 
+    void remove(Integer key);
+
     Set<Map.Entry<Integer, BibCapRecord>> entrySetOfRecords();
 
 }

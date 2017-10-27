@@ -10,7 +10,7 @@ import java.util.TreeSet;
 /**
  * Created by crco0001 on 10/11/2017.
  */
-public class PlayGroundBibCap {
+public class PlayGroundBibCapWriter {
 
 
     public static void main(String[] arg) throws IOException {
@@ -48,7 +48,7 @@ public class PlayGroundBibCap {
 
             BibCapRecord record = recordStore.getRecord(key);
 
-            if(!record.isConsideredRecord()) continue;
+            if(!record.isConsideredRecord()) {recordStore.remove(key) ; continue; }
 
             writer.write(record.toString());
             writer.newLine();
@@ -58,6 +58,7 @@ public class PlayGroundBibCap {
         writer.flush();
         writer.close();
 
+        System.out.println("new # mappings:  " + recordStore.size());
        recordStore.close();
     }
 

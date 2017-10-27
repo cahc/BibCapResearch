@@ -71,6 +71,14 @@ public class BibCapRecordStoreMVStore implements BibCapRecordStore {
         return map.get(key);
     }
 
+
+    @Override
+    public void remove(Integer key) {
+
+        map.remove(key);
+
+    }
+
     @Override
     public int size() {
 

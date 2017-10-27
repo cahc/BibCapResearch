@@ -27,6 +27,13 @@ public class BibCapRecordStoreInMemory extends HashMap<Integer, BibCapRecord> im
     }
 
 
+    @Override
+    public void remove(Integer key) {
+
+        super.remove(key);
+    }
+
+
 
     @Override
     public Set<Entry<Integer, BibCapRecord>> entrySetOfRecords() {
