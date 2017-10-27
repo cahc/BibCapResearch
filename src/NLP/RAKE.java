@@ -9,6 +9,7 @@ import jnr.ffi.Struct;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,11 +80,17 @@ public class RAKE {
     private final static RDRPOSTagger rdrposTagger;
 
 
+
     static {
 
         rdrposTagger = new RDRPOSTagger();
+
+        URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.RDR");
+
+        File file = new File(url.getFile());
+
         try {
-            rdrposTagger.constructTreeFromRulesFile("E:\\RDRPOSTagger-master\\Models\\POS\\English.RDR");
+            rdrposTagger.constructTreeFromRulesFile(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,8 +98,17 @@ public class RAKE {
 
     }
 
-    private final static HashMap<String, String> FREQDICT = Utils.getDictionary("E:\\RDRPOSTagger-master\\Models\\POS\\English.DICT");
+    private final static HashMap<String, String> FREQDICT;
 
+    static {
+
+        URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.DICT");
+
+        File file = new File(url.getFile());
+
+        FREQDICT = Utils.getDictionary(file);
+
+    }
     public void getTokens(String input) {
 
         List<String> tokens = Tokenizer(input);

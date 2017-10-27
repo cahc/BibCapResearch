@@ -1,13 +1,6 @@
 package NLP.RDRPOSTagger;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +22,12 @@ public class RDRPOSTagger
         root = node;
     }
 
-    public void constructTreeFromRulesFile(String rulesFilePath)
+    public void constructTreeFromRulesFile(File rulesFilePath)
             throws IOException
     {
-        BufferedReader buffer = new BufferedReader(new InputStreamReader(
-                new FileInputStream(new File(rulesFilePath)), "UTF-8"));
+
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(new FileInputStream(rulesFilePath), "UTF-8"));
+
         String line = buffer.readLine();
 
         this.root = new Node(new FWObject(false), "NN", null, null, null, 0);

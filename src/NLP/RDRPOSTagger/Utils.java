@@ -35,13 +35,13 @@ public class Utils
         return wordTagList;
     }
 
-    public static HashMap<String, String> getDictionary(String dictPath)
+    public static HashMap<String, String> getDictionary(File dictPath)
     {
         HashMap<String, String> dict = new HashMap<String, String>();
         BufferedReader buffer;
         try {
             buffer = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(new File(dictPath)), "UTF-8"));
+                    new FileInputStream( dictPath ), "UTF-8"));
             for (String line; (line = buffer.readLine()) != null;) {
                 String[] wordTag = line.split(" ");
                 dict.put(wordTag[0], wordTag[1]);
