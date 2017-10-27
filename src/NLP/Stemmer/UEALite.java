@@ -390,7 +390,7 @@ public class UEALite {
 
         UEALite ueaLite = new UEALite();
 
-        System.out.println("Stemming citations: " + ueaLite.stem("citations").word );
+        System.out.println("Stemming citations: " + ueaLite.stem("us").word );
 
     }
 

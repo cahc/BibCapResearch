@@ -4,15 +4,15 @@ import NLP.RDRPOSTagger.InitialTagger;
 import NLP.RDRPOSTagger.RDRPOSTagger;
 import NLP.RDRPOSTagger.Utils;
 import NLP.RDRPOSTagger.WordTag;
+import NLP.Stemmer.UEALite;
 import jnr.ffi.Struct;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Created by crco0001 on 10/26/2017.
@@ -122,7 +122,7 @@ public class RAKE {
 
         List<String> finaltags = this.rdrposTagger.finalTags(wordtags);
 
-        int diff = 0;
+
         for (int i = 0; i < finaltags.size(); i++) {
 
             System.out.println(wordtags.get(i).word + " " + wordtags.get(i).tag + " " + finaltags.get(i));
@@ -132,7 +132,7 @@ public class RAKE {
 
                 //System.out.println(wordtags.get(i).word +" " + wordtags.get(i).tag +" " + finaltags.get(i) );
 
-                diff++;
+
            // }
 
         }
@@ -143,6 +143,59 @@ public class RAKE {
 
     }
 
+    public Set<String> loadStopWordList(boolean stemWordsFromStopList) throws IOException {
+
+        Set<String> stopwords = new HashSet<String>();
+
+        InputStream  in = this.getClass().getResourceAsStream("/NLP/StopLists/fox.txt");
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader( in ));
+
+        String line;
+        while(  (line = reader.readLine() )  != null          ) {
+
+            if(line.startsWith("#")) continue;
+            if(line.length() == 0) continue;
+
+            stopwords.add( line.trim() );
+
+        }
+
+        reader.close();
+        in.close();
+
+
+        in = this.getClass().getResourceAsStream("/NLP/StopLists/smart.txt");
+
+        reader = new BufferedReader(new InputStreamReader( in ));
+
+
+        while(  (line = reader.readLine() )  != null          ) {
+
+            if(line.startsWith("#")) continue;
+            if(line.length() == 0) continue;
+
+            stopwords.add( line.trim() );
+
+        }
+
+
+        if(!stemWordsFromStopList) return stopwords;
+
+        UEALite stemmer = new UEALite();
+
+        Set<String> stemmedStopWords = new HashSet<>();
+        for(String s : stopwords) {
+
+                stemmedStopWords.add( (stemmer.stem(s)).getWord() );
+
+        }
+
+
+
+
+        return stemmedStopWords;
+    }
 
     public static List<String> Tokenizer(String input) {
 
@@ -202,6 +255,11 @@ public class RAKE {
 
         rake.getKeyWords(test, false);
 
+        Set<String> stopwords = rake.loadStopWordList(true);
+
+        System.out.println("# stopwords: " + stopwords.size());
+
+        for(String s: stopwords) System.out.println(s);
     }
 
 }

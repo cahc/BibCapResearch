@@ -24,4 +24,21 @@ public class Word {
         this.word = word;
         this.ruleno = ruleno;
     }
+
+
+    public String getWord() {
+        return word;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    public double getRuleno() {
+        return ruleno;
+    }
+
+    public void setRuleno(double ruleno) {
+        this.ruleno = ruleno;
+    }
 }
