@@ -68,6 +68,13 @@ import java.util.regex.Pattern;
 public class RAKE {
 
 
+    private static boolean isEngLetter(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+
+    }
+
+
+
     private static final String space = " ";
 
     private final static String whiteSpaceNormalize(String input) {
