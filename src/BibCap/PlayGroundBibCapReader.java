@@ -43,6 +43,7 @@ public class PlayGroundBibCapReader {
 
         //running single thread rake..
 
+        System.out.println("Loading Rake..");
         RAKE rake = new RAKE();
 
         Set<String> stopwords = rake.loadStopWordList(true);
