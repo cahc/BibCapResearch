@@ -75,6 +75,33 @@ public class RAKE {
 
 
 
+    private static boolean isConsideredWord(String s) {
+
+        int N = s.length();
+
+        if(N < 3 ) return false;
+
+        if(s.charAt(0) == '-' ) return false;
+        if(s.charAt(N -1 ) == '-') return false;
+
+        //check "alternative" length
+
+        int N2 = 0;
+        for(int i=0; i<N; i++ ) {
+
+            if( isEngLetter(  s.charAt(i)  ) ) N2++;
+
+            if(N2 >= 3) return true;
+
+
+        }
+
+
+        return false;
+    }
+
+
+
     private static final String space = " ";
 
     private final static String whiteSpaceNormalize(String input) {
@@ -105,6 +132,7 @@ public class RAKE {
         phraseAndWordDelimiterSet.add("_");
         phraseAndWordDelimiterSet.add("@");
         phraseAndWordDelimiterSet.add(" ");
+        phraseAndWordDelimiterSet.add("\"");
 
     }
 
@@ -141,7 +169,7 @@ public class RAKE {
     }
 
 
-    private final static Pattern phraseAndWordDelimiter = Pattern.compile("[\\.\\/\\\\,\\!\\?\\{\\}\\[\\]\\;\\:\\(\\)\\_\\@\\ ]+");
+    private final static Pattern phraseAndWordDelimiter = Pattern.compile("[\\\"\\.\\/\\\\,\\!\\?\\{\\}\\[\\]\\;\\:\\(\\)\\_\\@\\ ]+");
 
     private final static RDRPOSTagger rdrposTagger;
 
@@ -244,7 +272,7 @@ public class RAKE {
 
         }
 
-        //indicate if a stopword from list or a POS-tag not considered
+        //indicate if a stopword from list, a POS-tag not considered or not a minimum a 3-char a-z String
         boolean[] skipToken = new boolean[tokens.size()];
 
         for(int i=0; i < skipToken.length; i++) {
@@ -260,6 +288,9 @@ public class RAKE {
                 skipToken[ i ] = true;
 
             } else if(  RAKE.POStagsToIgnore.contains(  finaltags.get(i)  )) {
+
+                skipToken[i] = true;
+            } else if( !isConsideredWord(tokens.get(i))  ) {
 
                 skipToken[i] = true;
             }
@@ -437,6 +468,10 @@ public class RAKE {
        System.out.println("Testing n-grams:");
 
        System.out.println(nNgram("raw citation count"));
+
+
+       System.out.println(  isConsideredWord("citations") );
+
     }
 
 }
