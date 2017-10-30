@@ -1,11 +1,6 @@
 package NLP.RDRPOSTagger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,13 +30,13 @@ public class Utils
         return wordTagList;
     }
 
-    public static HashMap<String, String> getDictionary(File dictPath)
+    public static HashMap<String, String> getDictionary(InputStream dictPath)
     {
         HashMap<String, String> dict = new HashMap<String, String>();
         BufferedReader buffer;
         try {
             buffer = new BufferedReader(new InputStreamReader(
-                    new FileInputStream( dictPath ), "UTF-8"));
+                    dictPath , "UTF-8"));
             for (String line; (line = buffer.readLine()) != null;) {
                 String[] wordTag = line.split(" ");
                 dict.put(wordTag[0], wordTag[1]);

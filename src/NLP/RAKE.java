@@ -5,7 +5,6 @@ import NLP.RDRPOSTagger.RDRPOSTagger;
 import NLP.RDRPOSTagger.Utils;
 import NLP.RDRPOSTagger.WordTag;
 import NLP.Stemmer.UEALite;
-import jnr.ffi.Struct;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -13,7 +12,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Created by crco0001 on 10/26/2017.
@@ -70,27 +68,90 @@ import java.util.stream.Stream;
 public class RAKE {
 
 
+    private static final String space = " ";
+
     private final static String whiteSpaceNormalize(String input) {
 
         return StringUtils.normalizeSpace(input);
     }
 
-    private final static Pattern phraseAndWordDelimiter = Pattern.compile("[\\.\\/\\,\\!\\?\\{\\}\\[\\]\\;\\:\\(\\)\\_\\@\\ ]+");
+    private final static Set<String> phraseAndWordDelimiterSet;
+
+    static {
+
+        phraseAndWordDelimiterSet = new HashSet<>(30);
+
+        phraseAndWordDelimiterSet.add(".");
+        phraseAndWordDelimiterSet.add(",");
+        phraseAndWordDelimiterSet.add("/");
+        phraseAndWordDelimiterSet.add("\\");
+        phraseAndWordDelimiterSet.add("!");
+        phraseAndWordDelimiterSet.add("?");
+        phraseAndWordDelimiterSet.add("{");
+        phraseAndWordDelimiterSet.add("}");
+        phraseAndWordDelimiterSet.add("[");
+        phraseAndWordDelimiterSet.add("]");
+        phraseAndWordDelimiterSet.add(";");
+        phraseAndWordDelimiterSet.add(":");
+        phraseAndWordDelimiterSet.add("(");
+        phraseAndWordDelimiterSet.add(")");
+        phraseAndWordDelimiterSet.add("_");
+        phraseAndWordDelimiterSet.add("@");
+        phraseAndWordDelimiterSet.add(" ");
+
+    }
+
+    private final static Set<String> POStagsToIgnore;
+
+    static {
+
+
+    //     VB	    19639	1.9%	Verb, base form
+    //     VBD	23108	2.2%	Verb, past tense
+    //     VBG	17909	1.7%	Verb, gerund or present participle
+    //     VBN	32271	3.1%	Verb, past participle
+    //     VBP	13053	1.3%	Verb, non-3rd person singular present
+    //     VBZ	16971	1.6%	Verb, 3rd person singular present
+
+     //   RB	    21265	2.0%	Adverb
+     //   RBR	1415	0.1%	Adverb, comparative
+     //   RBS	548	    0.1%	Adverb, superlative
+
+
+        POStagsToIgnore = new HashSet<>(15);
+
+        POStagsToIgnore.add("VB");
+        POStagsToIgnore.add("VBD");
+        POStagsToIgnore.add("VBG");
+        POStagsToIgnore.add("VBN");
+        POStagsToIgnore.add("VBP");
+        POStagsToIgnore.add("VBZ");
+
+        POStagsToIgnore.add("RB");
+        POStagsToIgnore.add("RBR");
+        POStagsToIgnore.add("RBS");
+
+    }
+
+
+    private final static Pattern phraseAndWordDelimiter = Pattern.compile("[\\.\\/\\\\,\\!\\?\\{\\}\\[\\]\\;\\:\\(\\)\\_\\@\\ ]+");
 
     private final static RDRPOSTagger rdrposTagger;
-
-
 
     static {
 
         rdrposTagger = new RDRPOSTagger();
 
-        URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.RDR");
+       // URL url = RAKE.class.getResource("/NLP/RDRPOSTagger/Models/English.RDR");
+        InputStream in = RAKE.class.getResourceAsStream("/NLP/RDRPOSTagger/Models/English.RDR" );
 
-        File file = new File(url.getFile());
+       // System.out.println("THIS1: " + url.getPath() );
+        //URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.RDR");
+
+    //    File file = new File(url.getFile());
 
         try {
-            rdrposTagger.constructTreeFromRulesFile(file);
+            rdrposTagger.constructTreeFromRulesFile(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,15 +159,41 @@ public class RAKE {
 
     }
 
+    public static List<String> nNgram(String term) {
+
+
+        List<String> ngrams = new ArrayList();
+        String[] individualWords  =  term.split(" ");
+
+        if(individualWords.length <= 2) return Arrays.asList(term);
+
+        //else
+
+        for(int i=0; i<(individualWords.length-1); i++) {
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            ngrams.add(  stringBuilder.append( individualWords[i] ).append(space).append( individualWords[i+1] ).toString()   );
+
+
+        }
+
+        return ngrams;
+    }
+
     private final static HashMap<String, String> FREQDICT;
 
     static {
 
-        URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.DICT");
+        InputStream in = RAKE.class.getResourceAsStream("/NLP/RDRPOSTagger/Models/English.DICT" );
 
-        File file = new File(url.getFile());
 
-        FREQDICT = Utils.getDictionary(file);
+
+        //URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.DICT");
+
+
+
+        FREQDICT = Utils.getDictionary(in);
 
     }
     public void getTokens(String input) {
@@ -120,7 +207,7 @@ public class RAKE {
         }
     }
 
-    public void getKeyWords(String input, boolean cleanAbstractFromCopyright) {
+    public List<String> getKeyWords(String input, boolean cleanAbstractFromCopyright, Set<String> stopword, UEALite stemmer) {
 
         if(cleanAbstractFromCopyright) {
 
@@ -138,24 +225,84 @@ public class RAKE {
 
         List<String> finaltags = this.rdrposTagger.finalTags(wordtags);
 
+        //lowercase
 
-        for (int i = 0; i < finaltags.size(); i++) {
+        ListIterator<String > it = tokens.listIterator();
 
-            System.out.println(wordtags.get(i).word + " " + wordtags.get(i).tag + " " + finaltags.get(i));
+        while (it.hasNext()) {
 
+            String token = it.next();
 
-         //   if (!wordtags.get(i).tag.equals(finaltags.get(i))) {
+            it.set(  stemmer.stem(token.toLowerCase()).getWord()  );
 
-                //System.out.println(wordtags.get(i).word +" " + wordtags.get(i).tag +" " + finaltags.get(i) );
+        }
 
+        //indicate if a stopword from list or a POS-tag not considered
+        boolean[] skipToken = new boolean[tokens.size()];
 
-           // }
+        for(int i=0; i < skipToken.length; i++) {
+
+            boolean ignoreThisToken = stopword.contains( tokens.get(i) );
+
+            if(ignoreThisToken) {
+
+                skipToken[ i ] = true;
+
+            } else if(RAKE.phraseAndWordDelimiterSet.contains( tokens.get(i) )) {
+
+                skipToken[ i ] = true;
+
+            } else if(  RAKE.POStagsToIgnore.contains(  finaltags.get(i)  )) {
+
+                skipToken[i] = true;
+            }
+
 
         }
 
 
-      //  System.out.println("diffs : " + diff);
+        //now build potential key words and phrases
 
+        List<String> keywords = new ArrayList<>();
+
+        for(int i=0; i<skipToken.length; i++) {
+
+
+            if(skipToken[i]) {
+
+                continue;
+            } else {
+
+                StringBuilder term = new StringBuilder();
+
+                boolean firstTerm = true;
+
+                while(i <skipToken.length) {
+
+                    if(skipToken[i]) break;
+                    if(!firstTerm) term.append(space);
+                    term.append( tokens.get(i) );
+                    firstTerm = false;
+                    i++;
+                }
+
+
+                String finalTerm = term.toString();
+                if(finalTerm.length() > 2) {
+
+                    keywords.add(finalTerm);
+                }
+
+
+            }
+
+
+        }
+
+
+   //for (int i=0; i< tokens.size(); i++ ) System.out.println( tokens.get(i) + " " + skipToken[i] + " " + finaltags.get(i));
+
+    return keywords;
 
     }
 
@@ -264,18 +411,25 @@ public class RAKE {
     public static void main(String[] arg) throws IOException {
 
 
-        String test = "A similarity-oriented approach for deriving reference values used in citation normalization is explored and contrasted with the dominant approach of utilizing database-defined journal sets as a basis for deriving such values. In the similarity-oriented approach, an assessed article's raw citation count is compared with a reference value that is derived from a reference set, which is constructed in such a way that articles in this set are estimated to address a subject matter similar to that of the assessed article. This estimation is based on second-order similarity and utilizes a combination of 2 feature sets: bibliographic references and technical terminology. The contribution of an article in a given reference set to the reference value is dependent on its degree of similarity to the assessed article. It is shown that reference values calculated by the similarity-oriented approach are considerably better at predicting the assessed articles' citation count compared to the reference values given by the journal-set approach, thus significantly reducing the variability in the observed citation distribution that stems from the variability in the articles' addressed subject matter.";
-
+        String test2 = "A similarity-oriented approach for deriving reference values\\counts used in citation normalization is explored and contrasted with the dominant approach of utilizing database-defined journal sets as a basis for deriving such values. In the similarity-oriented approach, an assessed article's raw citation count is compared with a reference value that is derived from a reference set, which is constructed in such a way that articles in this set are estimated to address a subject matter similar to that of the assessed article. This estimation is based on second-order similarity and utilizes a combination of 2 feature sets: bibliographic references and technical terminology. The contribution of an article in a given reference set to the reference value is dependent on its degree of similarity to the assessed article. It is shown that reference values calculated by the similarity-oriented approach are considerably better at predicting the assessed articles' citation count compared to the reference values given by the journal-set approach, thus significantly reducing the variability in the observed citation distribution that stems from the variability in the articles' addressed subject matter.";
+        String test = "Automated structure validation was introduced in chemical crystallography about 12 years ago as a tool to assist practitioners with the exponential growth in crystal structure analyses. Validation has since evolved into an easy-to-use checkCIF/PLATON web-based IUCr service. The result of a crystal structure determination has to be supplied as a CIF-formatted computer-readable file. The checking software tests the data in the CIF for completeness, quality and consistency. In addition, the reported structure is checked for incomplete analysis, errors in the analysis and relevant issues to be verified. A validation report is generated in the form of a list of ALERTS on the issues to be corrected, checked or commented on. Structure validation has largely eliminated obvious problems with structure reports published in IUCr journals, such as refinement in a space group of too low symmetry. This paper reports on the current status of structure validation and possible future extensions.,, hello";
 
         RAKE rake = new RAKE();
 
-        rake.getKeyWords(test, false);
+
+        UEALite stemmer = new UEALite();
 
         Set<String> stopwords = rake.loadStopWordList(true);
 
-        System.out.println("# stopwords: " + stopwords.size());
+        List<String> extractedKeywords =  rake.getKeyWords(test2, false,stopwords,stemmer);
 
-        for(String s: stopwords) System.out.println(s);
+
+       System.out.println(extractedKeywords);
+
+
+       System.out.println("Testing n-grams:");
+
+       System.out.println(nNgram("raw citation count"));
     }
 
 }
