@@ -22,11 +22,13 @@ public class RDRPOSTagger
         root = node;
     }
 
-    public void constructTreeFromRulesFile(File rulesFilePath)
+    public void constructTreeFromRulesFile(InputStream rulesFilePath)
             throws IOException
     {
 
-        BufferedReader buffer = new BufferedReader(new InputStreamReader(new FileInputStream(rulesFilePath), "UTF-8"));
+
+
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(rulesFilePath, "UTF-8"));
 
         String line = buffer.readLine();
 

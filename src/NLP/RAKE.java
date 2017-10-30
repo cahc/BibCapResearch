@@ -5,7 +5,6 @@ import NLP.RDRPOSTagger.RDRPOSTagger;
 import NLP.RDRPOSTagger.Utils;
 import NLP.RDRPOSTagger.WordTag;
 import NLP.Stemmer.UEALite;
-import jnr.ffi.Struct;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -13,7 +12,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Created by crco0001 on 10/26/2017.
@@ -140,6 +138,26 @@ public class RAKE {
 
     private final static RDRPOSTagger rdrposTagger;
 
+    static {
+
+        rdrposTagger = new RDRPOSTagger();
+
+       // URL url = RAKE.class.getResource("/NLP/RDRPOSTagger/Models/English.RDR");
+        InputStream in = RAKE.class.getResourceAsStream("/NLP/RDRPOSTagger/Models/English.RDR" );
+
+       // System.out.println("THIS1: " + url.getPath() );
+        //URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.RDR");
+
+    //    File file = new File(url.getFile());
+
+        try {
+            rdrposTagger.constructTreeFromRulesFile(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     public static List<String> nNgram(String term) {
 
@@ -163,33 +181,19 @@ public class RAKE {
         return ngrams;
     }
 
-
-    static {
-
-        rdrposTagger = new RDRPOSTagger();
-
-        URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.RDR");
-
-        File file = new File(url.getFile());
-
-        try {
-            rdrposTagger.constructTreeFromRulesFile(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
     private final static HashMap<String, String> FREQDICT;
 
     static {
 
-        URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.DICT");
+        InputStream in = RAKE.class.getResourceAsStream("/NLP/RDRPOSTagger/Models/English.DICT" );
 
-        File file = new File(url.getFile());
 
-        FREQDICT = Utils.getDictionary(file);
+
+        //URL url = rdrposTagger.getClass().getResource("/NLP/RDRPOSTagger/Models/English.DICT");
+
+
+
+        FREQDICT = Utils.getDictionary(in);
 
     }
     public void getTokens(String input) {

@@ -45,6 +45,9 @@ public class PlayGroundBibCapReader {
 
         RAKE rake = new RAKE();
 
+        Set<String> stopwords = rake.loadStopWordList(true);
+        UEALite stemmer = new UEALite();
+
 
 /*
         BibCapRecord record = map.get(14318771);
@@ -70,10 +73,8 @@ public class PlayGroundBibCapReader {
 
             String summary = record.getAbstractText();
 
-            System.out.println(record.internalId + "@@" +record.getUT() );
+           // System.out.println(record.internalId + "@@" +record.getUT() );
 
-            Set<String> stopwords = rake.loadStopWordList(true);
-            UEALite stemmer = new UEALite();
 
             if(title != null) {
                List<String> keywordsFromTitle =  rake.getKeyWords(title,false,stopwords,stemmer);
