@@ -1,5 +1,6 @@
 package BibCap;
 
+import Misc.ProgressBar;
 import NLP.RAKE;
 import NLP.Stemmer.UEALite;
 import org.h2.mvstore.MVMap;
@@ -64,7 +65,15 @@ public class PlayGroundBibCapReader {
 */
 
 
+        ProgressBar bar = new ProgressBar();
+
         BufferedWriter bufferedWriter = new BufferedWriter( new FileWriter(new File("TermExtractorTest.txt")));
+
+        int totalN = map.size();
+        bar.update(0, totalN );
+
+        int counter = 0;
+
         for(Map.Entry<Integer,BibCapRecord> entry : map.entrySet()) {
 
 
@@ -79,15 +88,21 @@ public class PlayGroundBibCapReader {
 
             if(title != null) {
                List<String> keywordsFromTitle =  rake.getKeyWords(title,false,stopwords,stemmer);
-               bufferedWriter.write(keywordsFromTitle.toString());
-               bufferedWriter.newLine();
+               for(String s :keywordsFromTitle) { bufferedWriter.write( s ); bufferedWriter.newLine(); }
+
             }
             if(summary != null) {
                 List<String> keywordsFromAbstract = rake.getKeyWords(summary, true, stopwords, stemmer);
 
-                bufferedWriter.write(keywordsFromAbstract.toString());
-                bufferedWriter.newLine();
+                for(String s : keywordsFromAbstract)  { bufferedWriter.write(s); bufferedWriter.newLine(); }
+
             }
+
+
+            counter++;
+
+            if((counter % 100) == 0) bar.update(counter,totalN);
+
         }
 
 
