@@ -73,6 +73,10 @@ public class RAKE {
 
     }
 
+    private static boolean isDigit(char c) {
+
+        return  (c >= '0' && c <= '9');
+    }
 
 
     private static boolean isConsideredWord(String s) {
@@ -83,6 +87,9 @@ public class RAKE {
 
         if(s.charAt(0) == '-' ) return false;
         if(s.charAt(N -1 ) == '-') return false;
+
+        if( isDigit(  s.charAt(0) )  ) return false;
+
 
         //check "alternative" length
 
@@ -134,6 +141,16 @@ public class RAKE {
         phraseAndWordDelimiterSet.add(" ");
         phraseAndWordDelimiterSet.add("\"");
 
+        phraseAndWordDelimiterSet.add("#");
+        phraseAndWordDelimiterSet.add("%");
+        phraseAndWordDelimiterSet.add("$");
+        phraseAndWordDelimiterSet.add("<");
+        phraseAndWordDelimiterSet.add(">");
+        phraseAndWordDelimiterSet.add("=");
+
+
+        //TODO add: # % $ < > =
+
     }
 
     private final static Set<String> POStagsToIgnore;
@@ -169,7 +186,7 @@ public class RAKE {
     }
 
 
-    private final static Pattern phraseAndWordDelimiter = Pattern.compile("[\\\"\\.\\/\\\\,\\!\\?\\{\\}\\[\\]\\;\\:\\(\\)\\_\\@\\ ]+");
+    private final static Pattern phraseAndWordDelimiter = Pattern.compile("[\\=\\>\\<\\$\\%\\#\\\"\\.\\/\\\\,\\!\\?\\{\\}\\[\\]\\;\\:\\(\\)\\_\\@\\ ]+");
 
     private final static RDRPOSTagger rdrposTagger;
 
@@ -274,7 +291,7 @@ public class RAKE {
 
         }
 
-        //indicate if a stopword from list, a POS-tag not considered or not a minimum a 3-char a-z String
+        //indicate if a stopword from list, a POS-tag not considered or not a minimum a 3-char a-z String, start of withd
         boolean[] skipToken = new boolean[tokens.size()];
 
         for(int i=0; i < skipToken.length; i++) {
@@ -451,7 +468,7 @@ public class RAKE {
     public static void main(String[] arg) throws IOException {
 
 
-        String test2 = "A 'similarity-oriented approach for deriving reference values\\counts used in citation normalization is explored and contrasted with the dominant approach of utilizing database-defined journal sets as a basis for deriving such values. In the similarity-oriented approach, an assessed article's raw citation count is compared with a reference value that is derived from a reference set, which is constructed in such a way that articles in this set are estimated to address a subject matter similar to that of the assessed article. This estimation is based on second-order similarity and utilizes a combination of 2 feature sets: bibliographic references and technical terminology. The contribution of an article in a given reference set to the reference value is dependent on its degree of similarity to the assessed article. It is shown that reference values calculated by the similarity-oriented approach are considerably better at predicting the assessed articles' citation count compared to the reference values given by the journal-set approach, thus significantly reducing the variability in the observed citation distribution that stems from the variability in the articles' addressed subject matter.";
+        String test2 = "A #%$<>=similarity-oriented approach for deriving reference values\\counts used in citation normalization is explored and contrasted with the dominant approach of utilizing database-defined journal sets as a basis for deriving such values. In the similarity-oriented approach, an assessed article's raw citation count is compared with a reference value that is derived from a reference set, which is constructed in such a way that articles in this set are estimated to address a subject matter similar to that of the assessed article. This estimation is based on second-order similarity and utilizes a combination of 2 feature sets: bibliographic references and technical terminology. The contribution of an article in a given reference set to the reference value is dependent on its degree of similarity to the assessed article. It is shown that reference values calculated by the similarity-oriented approach are considerably better at predicting the assessed articles' citation count compared to the reference values given by the journal-set approach, thus significantly reducing the variability in the observed citation distribution that stems from the variability in the articles' addressed subject matter.";
         String test = "Automated structure validation was introduced in chemical crystallography about 12 years ago as a tool to assist practitioners with the exponential growth in crystal structure analyses. Validation has since evolved into an easy-to-use checkCIF/PLATON web-based IUCr service. The result of a crystal structure determination has to be supplied as a CIF-formatted computer-readable file. The checking software tests the data in the CIF for completeness, quality and consistency. In addition, the reported structure is checked for incomplete analysis, errors in the analysis and relevant issues to be verified. A validation report is generated in the form of a list of ALERTS on the issues to be corrected, checked or commented on. Structure validation has largely eliminated obvious problems with structure reports published in IUCr journals, such as refinement in a space group of too low symmetry. This paper reports on the current status of structure validation and possible future extensions.,, hello";
 
         RAKE rake = new RAKE();
@@ -472,7 +489,7 @@ public class RAKE {
        System.out.println(nNgram("raw citation count"));
 
 
-       System.out.println(  isConsideredWord("citations") );
+       System.out.println(  isConsideredWord("6citations") );
 
     }
 
