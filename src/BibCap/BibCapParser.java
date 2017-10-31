@@ -213,11 +213,28 @@ public class BibCapParser {
             StringBuilder citedString = new StringBuilder();
 
             int missing = 0;
-            if(cited_author.length() > 1)  {citedString.append(cited_author); } else {missing++;}
+            if(cited_author.length() > 1)  {
+
+
+                //MAIR, RJ --> MAIR, R
+               int index = cited_author.indexOf(',');
+
+               if(index != -1) cited_author = cited_author.substring(0,index+3);
+
+                citedString.append(cited_author);
+
+
+
+
+
+
+            } else {missing++;}
+
+
             if(cited_year.length() > 1)  {citedString.append(" ").append(cited_year); } else {missing++;}
             if(cited_work.length() > 1)  {citedString.append(" ").append(cited_work); } else {missing++;}
             if(cited_volume.length() > 1) {citedString.append(" ").append(cited_volume); } else {missing++;}
-            if(cited_page.length() > 1)  {citedString.append(" ").append(cited_volume); } else {missing++;}
+            if(cited_page.length() > 1)  {citedString.append(" ").append(cited_page); } else {missing++;}
 
 
             if(missing > 2) {
