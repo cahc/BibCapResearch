@@ -9,12 +9,9 @@ public class MiscPlayground {
 
         LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
 
+       System.out.println( levenshteinDistance.getNormalizedLevenshteinSimilarity("The stupid doggy","the stupid dog",0.80) );
 
-
-      // System.out.println(dist);
-
-
-       System.out.println( levenshteinDistance.getNormalizedLevenshteinSimilarity("SWENY TOD","SWENYTOD",0.89F) );
+        System.out.println( levenshteinDistance.isAboveSimilarityThreshold("The stupid doggy","the stupid dog",0.85) );
 
     }
 
