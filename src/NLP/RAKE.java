@@ -1,5 +1,6 @@
 package NLP;
 
+import Misc.RemoveCopyRightFromAbstract;
 import NLP.RDRPOSTagger.InitialTagger;
 import NLP.RDRPOSTagger.RDRPOSTagger;
 import NLP.RDRPOSTagger.Utils;
@@ -8,7 +9,6 @@ import NLP.Stemmer.UEALite;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
