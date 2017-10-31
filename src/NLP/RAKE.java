@@ -249,7 +249,7 @@ public class RAKE {
            input = RemoveCopyRightFromAbstract.cleanedAbstract(input);
 
         }
-        
+
         input = input.replaceAll("'","");
 
         List<String> tokens = Tokenizer(input);

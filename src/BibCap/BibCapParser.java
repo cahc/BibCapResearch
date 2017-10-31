@@ -185,6 +185,8 @@ public class BibCapParser {
         HashSet<Integer> countRecordsWitRef = new HashSet<>();
 
         BufferedWriter badReferencesWriter= new BufferedWriter( new FileWriter( new File("badReferences.txt")));
+        BufferedWriter goodReferenceWriter = new BufferedWriter( new FileWriter( new File("goodReferences.txt")) );
+
         int badRefCount = 0;
 
         idOfCurrentFetechedDoc = -99;
@@ -254,7 +256,10 @@ public class BibCapParser {
             } else {
 
                 if(idOfCurrentFetechedDoc == id) {
-                    bibCapRecord.addCitedReferenceString(citedString.toString().trim());
+                    String okRef = citedString.toString();
+                    bibCapRecord.addCitedReferenceString( okRef );
+                    goodReferenceWriter.write(okRef);
+                    goodReferenceWriter.newLine();
                     countRecordsWitRef.add(id);
 
 
@@ -264,7 +269,11 @@ public class BibCapParser {
 
 
                     bibCapRecord = bibCapRecordStore.getRecord(id);
-                    bibCapRecord.addCitedReferenceString(citedString.toString().trim());
+                    String okRef = citedString.toString();
+                    goodReferenceWriter.write(okRef);
+                    goodReferenceWriter.newLine();
+
+                    bibCapRecord.addCitedReferenceString( okRef ) ;
                     countRecordsWitRef.add(id);
                     idOfCurrentFetechedDoc = id;
 
