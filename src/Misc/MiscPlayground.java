@@ -11,7 +11,7 @@ public class MiscPlayground {
 
        System.out.println( levenshteinDistance.getNormalizedLevenshteinSimilarity("The stupid doggy","the stupid dog",0.80) );
 
-        System.out.println( levenshteinDistance.isAboveSimilarityThreshold("The stupid doggy","the stupid dog",0.85) );
+        System.out.println( levenshteinDistance.isAboveSimilarityThreshold("The stupid doggy","the stupid dog",0.85,true) );
 
 
 

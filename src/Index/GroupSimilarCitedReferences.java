@@ -1,6 +1,8 @@
 package Index;
 
 import BibCap.BibCapRecord;
+import Misc.LevenshteinDistance;
+import Misc.ProgressBar;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -13,6 +15,7 @@ import org.h2.mvstore.type.ObjectDataType;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by crco0001 on 10/31/2017.
@@ -81,17 +84,51 @@ public class GroupSimilarCitedReferences {
         });
 
 
-        System.out.println("Unique references: " + referenceCounter.size());
+        //sorted by insertion order
+        LinkedHashSet<String> sortedSet = new LinkedHashSet<>();
+        for(Object2IntMap.Entry<String> s: list) sortedSet.add( s.getKey() );
 
-        System.out.println("max:");
-        System.out.println(list.get(0).getKey() + " -->" + list.get(0).getIntValue());
+        //for GC
+        map = null;
+        list = null;
 
-        System.out.println("min:");
-        System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
+        //System.out.println("Unique references: " + referenceCounter.size());
+
+        //System.out.println("max:");
+        //System.out.println(list.get(0).getKey() + " -->" + list.get(0).getIntValue());
+
+        //System.out.println("min:");
+        //System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
 
 
-        System.out.println("now running levenstein.. this will take a long time!");
+        System.out.println("now running parallell cited reference merger.. this will take a long time!");
 
+        Iterator iter = sortedSet.iterator();
+        ProgressBar bar = new ProgressBar();
+        int N = sortedSet.size();
+        bar.update(0,N);
+        int counter = 0;
+        while(iter.hasNext()) {
+
+            String targetRef = sortedSet.iterator().next();
+
+            System.out.println("Running in parallell");
+
+            List<String> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef, targetRef, 0.90, true)).collect(Collectors.toList());
+
+            //System.out.println("# hits: " + matches.size());
+
+            //for (Object s : matches) System.out.println(s.toString());
+
+            //now remove
+
+            for(String s : matches) sortedSet.remove(s);
+
+            counter++;
+
+            if(counter % 500 == 0) bar.update(sortedSet.size(),N);
+
+        }
 
 
     }

@@ -3,10 +3,16 @@ package Misc;
 public class LevenshteinDistance {
 
 
-    public static boolean isAboveSimilarityThreshold(String s, String t, double minSimilarity) {
+    public static boolean isAboveSimilarityThreshold(String s, String t, double minSimilarity, boolean firstCharMustMatch) {
 
         //Given a similarity threshold [0,1]
         //calculate the max number of edits that are OK before one should give up
+
+        if(firstCharMustMatch) {
+
+            if( s.charAt(0) != t.charAt(0) ) return false;
+
+        }
 
         double x = 1-minSimilarity;
 
