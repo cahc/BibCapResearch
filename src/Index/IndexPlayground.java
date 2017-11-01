@@ -4,14 +4,15 @@ import BibCap.BibCapRecord;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.type.ObjectDataType;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by crco0001 on 10/31/2017.
@@ -57,10 +58,37 @@ public class IndexPlayground {
 
         }
 
+       // ObjectIterator<Object2IntMap.Entry<String>> fastIterator =  referenceCounter.object2IntEntrySet().fastIterator();
+
+
+        Object2IntMap.FastEntrySet<String> entrySet = referenceCounter.object2IntEntrySet();
+
+        List<Object2IntMap.Entry<String>> list = new ArrayList<Object2IntMap.Entry<String>>(entrySet);
+
+
+        Collections.sort(list, new Comparator<Object2IntMap.Entry<String>>() {
+            @Override
+            public int compare(Object2IntMap.Entry<String> o1, Object2IntMap.Entry<String> o2) {
+
+                int val_o1 = o1.getIntValue();
+                int val_o2 = o2.getIntValue();
+
+                if(val_o1 < val_o2) return 1;
+                if(val_o2 > val_o1) return -1;
+
+                return 0;
+
+
+            }
+        });
+
 
         System.out.println("Unique references: " + referenceCounter.size());
 
 
+        System.out.println(list.get(0).getKey() + " " + list.get(0).getIntValue());
+
+        store.close();
 
     }
 
