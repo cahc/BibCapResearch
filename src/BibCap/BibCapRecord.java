@@ -174,7 +174,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
 
         if(this.internalId < other.internalId) return -1;
-        if(other.internalId < this.internalId) return 1;
+        if(this.internalId > other.internalId) return 1;
         if(this.internalId == other.internalId) return 0;
         return (this.UT.compareTo(other.UT));
 

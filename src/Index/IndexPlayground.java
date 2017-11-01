@@ -63,9 +63,11 @@ public class IndexPlayground {
 
         Object2IntMap.FastEntrySet<String> entrySet = referenceCounter.object2IntEntrySet();
 
+
         List<Object2IntMap.Entry<String>> list = new ArrayList<Object2IntMap.Entry<String>>(entrySet);
 
 
+        System.out.println("now sorting..");
         Collections.sort(list, new Comparator<Object2IntMap.Entry<String>>() {
             @Override
             public int compare(Object2IntMap.Entry<String> o1, Object2IntMap.Entry<String> o2) {
@@ -74,7 +76,7 @@ public class IndexPlayground {
                 int val_o2 = o2.getIntValue();
 
                 if(val_o1 < val_o2) return 1;
-                if(val_o2 > val_o1) return -1;
+                if(val_o1 > val_o2) return -1;
 
                 return 0;
 
@@ -82,15 +84,16 @@ public class IndexPlayground {
             }
         });
 
+        System.out.println("done");
 
         System.out.println("Unique references: " + referenceCounter.size());
 
 
         System.out.println("max:");
-        System.out.println(list.get(0).getKey() + " " + list.get(0).getIntValue());
+        System.out.println(list.get(0).getKey() + " -->" + list.get(0).getIntValue());
 
         System.out.println("min:");
-        System.out.println(list.get( list.size()-1 ).getKey() + " " + list.get( list.size()-1 ).getIntValue());
+        System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
 
         store.close();
 
