@@ -274,7 +274,11 @@ public class RAKE {
 
         }
 
+
         input = input.replaceAll("'","");
+
+        //TODO check this..not really correct
+        input = input.replaceAll("-"," ");
 
         List<String> tokens = Tokenizer(input);
 
