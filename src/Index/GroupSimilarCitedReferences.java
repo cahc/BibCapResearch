@@ -103,16 +103,14 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("now running parallell cited reference merger.. this will take a long time!");
 
-        Iterator iter = sortedSet.iterator();
+
         ProgressBar bar = new ProgressBar();
         int N = sortedSet.size();
         bar.update(0,N);
         int counter = 0;
-        while(iter.hasNext()) {
+        while( !sortedSet.isEmpty() ) {
 
             String targetRef = sortedSet.iterator().next();
-
-            System.out.println("Running in parallell");
 
             List<String> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef, targetRef, 0.90, true)).collect(Collectors.toList());
 
@@ -126,7 +124,7 @@ public class GroupSimilarCitedReferences {
 
             counter++;
 
-            if(counter % 500 == 0) bar.update(sortedSet.size(),N);
+            if(counter % 200 == 0) bar.update(sortedSet.size(),N);
 
         }
 
