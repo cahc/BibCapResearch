@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * Created by crco0001 on 10/31/2017.
  */
-public class IndexPlayground {
+public class GroupSimilarCitedReferences {
 
 
     public static void main(String[] arg) {
@@ -26,14 +26,11 @@ public class IndexPlayground {
         Object2IntOpenHashMap<String> referenceCounter = new Object2IntOpenHashMap();
         referenceCounter.defaultReturnValue(0);
 
-
-
         if(arg.length != 1) {  System.out.println("Supply name of MVstore DB"); System.exit(0); }
 
         File check = new File(arg[0]);
 
         if(!check.exists()) { System.out.println("File dosent exist"); System.exit(0); }
-
 
         MVStore store = new MVStore.Builder().cacheSize(200). // 200MB read cache
                 fileName(arg[0]).autoCommitBufferSize(1024). // 1MB write cache
@@ -44,7 +41,7 @@ public class IndexPlayground {
         MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer,BibCapRecord>().keyType(new ObjectDataType()).valueType( new BibCapRecord() ));
 
 
-
+        System.out.println("Counting frequencies..");
         for(Map.Entry<Integer,BibCapRecord> entry : map.entrySet()) {
 
 
@@ -52,14 +49,13 @@ public class IndexPlayground {
 
             if(references.size() == 0) continue;
 
-
             for(String s : references) referenceCounter.addTo(s,1);
 
 
         }
 
-       // ObjectIterator<Object2IntMap.Entry<String>> fastIterator =  referenceCounter.object2IntEntrySet().fastIterator();
-
+        System.out.println("Closing database");
+        store.close();
 
         Object2IntMap.FastEntrySet<String> entrySet = referenceCounter.object2IntEntrySet();
 
@@ -67,7 +63,7 @@ public class IndexPlayground {
         List<Object2IntMap.Entry<String>> list = new ArrayList<Object2IntMap.Entry<String>>(entrySet);
 
 
-        System.out.println("now sorting..");
+        System.out.println("Sorting..");
         Collections.sort(list, new Comparator<Object2IntMap.Entry<String>>() {
             @Override
             public int compare(Object2IntMap.Entry<String> o1, Object2IntMap.Entry<String> o2) {
@@ -84,10 +80,8 @@ public class IndexPlayground {
             }
         });
 
-        System.out.println("done");
 
         System.out.println("Unique references: " + referenceCounter.size());
-
 
         System.out.println("max:");
         System.out.println(list.get(0).getKey() + " -->" + list.get(0).getIntValue());
@@ -95,7 +89,10 @@ public class IndexPlayground {
         System.out.println("min:");
         System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
 
-        store.close();
+
+        System.out.println("now running levenstein.. this will take a long time!");
+
+
 
     }
 
