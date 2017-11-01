@@ -7,10 +7,7 @@ import Misc.ProgressBar;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.*;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.type.ObjectDataType;
@@ -94,6 +91,7 @@ public class GroupSimilarCitedReferences {
         //for GC
         map = null;
         list = null;
+        System.gc();
 
         //System.out.println("Unique references: " + referenceCounter.size());
 
@@ -104,11 +102,23 @@ public class GroupSimilarCitedReferences {
         //System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
 
 
-            String targetRef = sortedSet.first().getReference();
+        Object2ObjectMap<String,ObjectOpenHashSet<BibCapCitedReferenceWithNgram>>  invertedNgramIndex = new Object2ObjectOpenHashMap<>();
 
-            List<BibCapCitedReferenceWithNgram> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef.getReference(), targetRef, 0.90, true)).collect(Collectors.toList());
+        System.out.println("building index..");
 
-            for(BibCapCitedReferenceWithNgram s : matches) System.out.println(s);
+
+
+        //todo if remove force rehash?
+
+            while (!sortedSet.isEmpty()) {
+
+                String targetRef = sortedSet.first().getReference();
+
+                List<BibCapCitedReferenceWithNgram> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef.getReference(), targetRef, 0.90, true)).collect(Collectors.toList());
+
+                for (BibCapCitedReferenceWithNgram s : matches) System.out.println(s);
+
+            }
 
         }
 
