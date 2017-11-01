@@ -108,6 +108,8 @@ public class GroupSimilarCitedReferences {
         int N = sortedSet.size();
         bar.update(0,N);
         int counter = 0;
+
+        System.out.println("Initial size: " + sortedSet.size());
         while( !sortedSet.isEmpty() ) {
 
             String targetRef = sortedSet.iterator().next();
@@ -124,7 +126,9 @@ public class GroupSimilarCitedReferences {
 
             counter++;
 
-            if(counter % 200 == 0) bar.update(sortedSet.size(),N);
+            if(counter % 200 == 0) bar.update(N-sortedSet.size(),N);
+
+            if(counter % 1000 == 0) System.out.println("Size now: " + sortedSet.size());
 
         }
 
