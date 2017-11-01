@@ -1,7 +1,5 @@
 package BibCap;
 
-import Persistor.FooObject;
-import Persistor.FooObjectSerializer;
 import org.h2.mvstore.DataUtils;
 import org.h2.mvstore.WriteBuffer;
 import org.h2.mvstore.type.DataType;
@@ -29,7 +27,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     String source;
 
-    List<String> citedReferences = new ArrayList<>();
+    List<BibCapCitedReferenceWithNgram> bibCapCitedReferenceWithNgrams = new ArrayList<>();
     List<String> extractedTerms = new ArrayList<>();
 
     int citationsIncSelf;
@@ -42,7 +40,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + citedReferences +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReferenceWithNgrams +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
 
     }
 
@@ -63,9 +61,9 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
         this.citationsExclSelf = citationsExclSelf;
     }
 
-    public List<String> getCitedReferences() {
+    public List<BibCapCitedReferenceWithNgram> getCitedReferencesWithNgram() {
 
-        return citedReferences;
+        return bibCapCitedReferenceWithNgrams;
 
     }
 
@@ -86,14 +84,14 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     }
 
-    public void addCitedReferenceString(String s) {
+    public void addCitedReferenceWithNgram(BibCapCitedReferenceWithNgram s) {
 
-        citedReferences.add(s);
+        bibCapCitedReferenceWithNgrams.add(s);
     }
 
     public int getNrCitedReferences() {
 
-        return this.citedReferences.size();
+        return this.bibCapCitedReferenceWithNgrams.size();
     }
 
 

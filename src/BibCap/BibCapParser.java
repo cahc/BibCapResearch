@@ -1,5 +1,7 @@
 package BibCap;
 
+import Misc.Ngram;
+
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -179,6 +181,7 @@ public class BibCapParser {
 
 
         System.out.println("Getting cited references in pass 3..");
+        System.out.println("Also calculating Ngrams (N=3) for use in later indexing phase");
 
         reader = new BufferedReader(new FileReader(this.citedRefs));
         firstline = true;
@@ -247,7 +250,17 @@ public class BibCapParser {
 
                     if(idOfCurrentFetechedDoc == id) {
 
-                        bibCapRecord.addCitedReferenceString(m.group(0).trim());
+                        //extract ngrams for indexing
+                        //remove space first
+                        List<String> ngramsFromAuthorname = Ngram.ngramsOrInput( 3, cited_author.replaceAll("[, ]","") );
+                        List<String> ngramsFromCitedWork = Ngram.ngramsOrInput( 3, cited_work.replaceAll(" ","") );
+
+                        BibCapCitedReferenceWithNgram bibCapCitedReferenceWithNgram = new BibCapCitedReferenceWithNgram();
+                        bibCapCitedReferenceWithNgram.setReference( m.group(0).trim() );
+                        bibCapCitedReferenceWithNgram.setNgramFromAuthor( ngramsFromAuthorname );
+                        bibCapCitedReferenceWithNgram.setNgramFromWork( ngramsFromCitedWork );
+
+                        bibCapRecord.addCitedReferenceWithNgram( bibCapCitedReferenceWithNgram );
                         countRecordsWitRef.add(id);
 
                     } else {
@@ -257,7 +270,16 @@ public class BibCapParser {
 
                         //now new
                         bibCapRecord = bibCapRecordStore.getRecord(id);
-                        bibCapRecord.addCitedReferenceString(m.group(0).trim());
+
+                        List<String> ngramsFromAuthorname = Ngram.ngramsOrInput( 3, cited_author.replaceAll("[, ]","") );
+                        List<String> ngramsFromCitedWork = Ngram.ngramsOrInput( 3, cited_work.replaceAll(" ","") );
+
+                        BibCapCitedReferenceWithNgram bibCapCitedReferenceWithNgram = new BibCapCitedReferenceWithNgram();
+                        bibCapCitedReferenceWithNgram.setReference( m.group(0).trim() );
+                        bibCapCitedReferenceWithNgram.setNgramFromAuthor( ngramsFromAuthorname );
+                        bibCapCitedReferenceWithNgram.setNgramFromWork( ngramsFromCitedWork );
+
+                        bibCapRecord.addCitedReferenceWithNgram( bibCapCitedReferenceWithNgram  );
                         countRecordsWitRef.add(id);
                         idOfCurrentFetechedDoc = id;
 
@@ -274,7 +296,16 @@ public class BibCapParser {
 
                 if(idOfCurrentFetechedDoc == id) {
                     String okRef = citedString.toString();
-                    bibCapRecord.addCitedReferenceString( okRef );
+
+                    List<String> ngramsFromAuthorname = Ngram.ngramsOrInput( 3, cited_author.replaceAll("[, ]","") );
+                    List<String> ngramsFromCitedWork = Ngram.ngramsOrInput( 3, cited_work.replaceAll(" ","") );
+
+                    BibCapCitedReferenceWithNgram bibCapCitedReferenceWithNgram = new BibCapCitedReferenceWithNgram();
+                    bibCapCitedReferenceWithNgram.setReference( okRef );
+                    bibCapCitedReferenceWithNgram.setNgramFromAuthor( ngramsFromAuthorname );
+                    bibCapCitedReferenceWithNgram.setNgramFromWork( ngramsFromCitedWork );
+
+                    bibCapRecord.addCitedReferenceWithNgram( bibCapCitedReferenceWithNgram );
                     goodReferenceWriter.write(okRef);
                     goodReferenceWriter.newLine();
                     countRecordsWitRef.add(id);
@@ -290,7 +321,16 @@ public class BibCapParser {
                     goodReferenceWriter.write(okRef);
                     goodReferenceWriter.newLine();
 
-                    bibCapRecord.addCitedReferenceString( okRef ) ;
+                    List<String> ngramsFromAuthorname = Ngram.ngramsOrInput( 3, cited_author.replaceAll("[, ]","") );
+                    List<String> ngramsFromCitedWork = Ngram.ngramsOrInput( 3, cited_work.replaceAll(" ","") );
+
+                    BibCapCitedReferenceWithNgram bibCapCitedReferenceWithNgram = new BibCapCitedReferenceWithNgram();
+                    bibCapCitedReferenceWithNgram.setReference( okRef );
+                    bibCapCitedReferenceWithNgram.setNgramFromAuthor( ngramsFromAuthorname );
+                    bibCapCitedReferenceWithNgram.setNgramFromWork( ngramsFromCitedWork );
+
+
+                    bibCapRecord.addCitedReferenceWithNgram( bibCapCitedReferenceWithNgram ); ;
                     countRecordsWitRef.add(id);
                     idOfCurrentFetechedDoc = id;
 
