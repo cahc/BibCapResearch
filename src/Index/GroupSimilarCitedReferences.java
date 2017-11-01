@@ -101,7 +101,7 @@ public class GroupSimilarCitedReferences {
         //System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
 
 
-        System.out.println("now running parallell cited reference merger.. this will take a long time!");
+        System.out.println("now running parallel cited reference merger.. this will take a long time!");
 
 
         ProgressBar bar = new ProgressBar();
