@@ -27,6 +27,7 @@ public class Ngram {
 
     public static void main(String[] arg) {
 
+
         System.out.println( Ngram.ngramsOrInput(3,"helo"));
 
     }
