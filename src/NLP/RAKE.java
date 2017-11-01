@@ -155,9 +155,7 @@ public class RAKE {
         phraseAndWordDelimiterSet.add("`");
         phraseAndWordDelimiterSet.add("|");
 
-
-        //TODO add: & * + ` |
-
+        
     }
 
     private final static Set<String> POStagsToIgnore;
