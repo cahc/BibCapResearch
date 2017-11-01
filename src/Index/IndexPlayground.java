@@ -86,7 +86,11 @@ public class IndexPlayground {
         System.out.println("Unique references: " + referenceCounter.size());
 
 
+        System.out.println("max:");
         System.out.println(list.get(0).getKey() + " " + list.get(0).getIntValue());
+
+        System.out.println("min:");
+        System.out.println(list.get( list.size()-1 ).getKey() + " " + list.get( list.size()-1 ).getIntValue());
 
         store.close();
 

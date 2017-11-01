@@ -155,7 +155,7 @@ public class RAKE {
         phraseAndWordDelimiterSet.add("`");
         phraseAndWordDelimiterSet.add("|");
 
-        
+
     }
 
     private final static Set<String> POStagsToIgnore;
@@ -487,7 +487,7 @@ public class RAKE {
 
         Set<String> stopwords = rake.loadStopWordList(true);
 
-        List<String> extractedKeywords =  rake.getKeyWords(test2, false,stopwords,stemmer);
+        List<String> extractedKeywords =  rake.getKeyWords(test, false,stopwords,stemmer);
 
 
        System.out.println(extractedKeywords);
