@@ -27,7 +27,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     String source;
 
-    List<BibCapCitedReferenceWithNgram> bibCapCitedReferenceWithNgrams = new ArrayList<>();
+    List<String> bibCapCitedReference = new ArrayList<>();
     List<String> extractedTerms = new ArrayList<>();
 
     int citationsIncSelf;
@@ -40,7 +40,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReferenceWithNgrams +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
 
     }
 
@@ -61,9 +61,9 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
         this.citationsExclSelf = citationsExclSelf;
     }
 
-    public List<BibCapCitedReferenceWithNgram> getCitedReferencesWithNgram() {
+    public List<String> getCitedReferences() {
 
-        return bibCapCitedReferenceWithNgrams;
+        return bibCapCitedReference;
 
     }
 
@@ -84,14 +84,14 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     }
 
-    public void addCitedReferenceWithNgram(BibCapCitedReferenceWithNgram s) {
+    public void addCitedReferenceF(String s) {
 
-        bibCapCitedReferenceWithNgrams.add(s);
+        bibCapCitedReference.add(s);
     }
 
     public int getNrCitedReferences() {
 
-        return this.bibCapCitedReferenceWithNgrams.size();
+        return this.bibCapCitedReference.size();
     }
 
 

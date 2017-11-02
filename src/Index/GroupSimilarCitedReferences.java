@@ -25,7 +25,7 @@ public class GroupSimilarCitedReferences {
     public static void main(String[] arg) {
 
 
-        Object2IntOpenHashMap<BibCapCitedReferenceWithNgram> referenceCounter = new Object2IntOpenHashMap();
+        Object2IntOpenHashMap<String> referenceCounter = new Object2IntOpenHashMap();
         referenceCounter.defaultReturnValue(0);
 
         if(arg.length != 1) {  System.out.println("Supply name of MVstore DB"); System.exit(0); }
@@ -47,11 +47,11 @@ public class GroupSimilarCitedReferences {
         for(Map.Entry<Integer,BibCapRecord> entry : map.entrySet()) {
 
 
-            List<BibCapCitedReferenceWithNgram> references = entry.getValue().getCitedReferencesWithNgram();
+            List<String> references = entry.getValue().getCitedReferences();
 
             if(references.size() == 0) continue;
 
-            for(BibCapCitedReferenceWithNgram s : references) referenceCounter.addTo(s,1);
+            for(String s : references) referenceCounter.addTo(s,1);
 
 
         }
@@ -59,16 +59,16 @@ public class GroupSimilarCitedReferences {
         System.out.println("Closing database");
         store.close();
 
-        Object2IntMap.FastEntrySet<BibCapCitedReferenceWithNgram> entrySet = referenceCounter.object2IntEntrySet();
+        Object2IntMap.FastEntrySet<String> entrySet = referenceCounter.object2IntEntrySet();
 
 
-        List<Object2IntMap.Entry<BibCapCitedReferenceWithNgram>> list = new ArrayList<Object2IntMap.Entry<BibCapCitedReferenceWithNgram>>(entrySet);
+        List<Object2IntMap.Entry<String>> list = new ArrayList<Object2IntMap.Entry<String>>(entrySet);
 
 
         System.out.println("Sorting..");
-        Collections.sort(list, new Comparator<Object2IntMap.Entry<BibCapCitedReferenceWithNgram>>() {
+        Collections.sort(list, new Comparator<Object2IntMap.Entry<String>>() {
             @Override
-            public int compare(Object2IntMap.Entry<BibCapCitedReferenceWithNgram> o1, Object2IntMap.Entry<BibCapCitedReferenceWithNgram> o2) {
+            public int compare(Object2IntMap.Entry<String> o1, Object2IntMap.Entry<String> o2) {
 
                 int val_o1 = o1.getIntValue();
                 int val_o2 = o2.getIntValue();
@@ -84,41 +84,29 @@ public class GroupSimilarCitedReferences {
 
 
         //sorted by insertion order
-        ObjectLinkedOpenHashSet<BibCapCitedReferenceWithNgram> sortedSet = new ObjectLinkedOpenHashSet<>();
+        ObjectLinkedOpenHashSet<String> sortedSet = new ObjectLinkedOpenHashSet<>( list.size()+1 );
 
-        for(Object2IntMap.Entry<BibCapCitedReferenceWithNgram> s: list) sortedSet.add( s.getKey() );
+        for(Object2IntMap.Entry<String> s: list) sortedSet.add( s.getKey() );
 
         //for GC
         map = null;
         list = null;
         System.gc();
 
-        //System.out.println("Unique references: " + referenceCounter.size());
+        System.out.println("Unique references: " + sortedSet.size());
 
-        //System.out.println("max:");
-        //System.out.println(list.get(0).getKey() + " -->" + list.get(0).getIntValue());
-
-        //System.out.println("min:");
-        //System.out.println(list.get( list.size()-1 ).getKey() + " -->" + list.get( list.size()-1 ).getIntValue());
-
-
-        Object2ObjectMap<String,ObjectOpenHashSet<BibCapCitedReferenceWithNgram>>  invertedNgramIndex = new Object2ObjectOpenHashMap<>();
-
-        System.out.println("building index..");
+        System.out.println("max:");
+        String targetRef = sortedSet.first();
+        System.out.println(list.get(0).getKey() + " -->" + targetRef);
 
 
 
-        //todo if remove force rehash?
+        List<String> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef, targetRef , 0.90, true)).collect(Collectors.toList());
 
-            while (!sortedSet.isEmpty()) {
+        for(String s : matches) System.out.println(s);
 
-                String targetRef = sortedSet.first().getReference();
 
-                List<BibCapCitedReferenceWithNgram> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef.getReference(), targetRef, 0.90, true)).collect(Collectors.toList());
 
-                for (BibCapCitedReferenceWithNgram s : matches) System.out.println(s);
-
-            }
 
         }
 
