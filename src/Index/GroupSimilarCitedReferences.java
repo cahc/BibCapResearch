@@ -118,7 +118,7 @@ public class GroupSimilarCitedReferences {
 
         for(String s : sortedSet) {
 
-            List<String> ngrams = Ngram.normalizedBeforeNgram(5,s);
+            List<String> ngrams = Ngram.normalizedBeforeNgram(6,s);
 
                 for(String ngram : ngrams) {
                     ObjectOpenHashSet<String> set = multimap.get(ngram);
@@ -147,11 +147,22 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("Nr candidates: " + candidates.size());
 
-
         List<String> matches2 = candidates.parallelStream().filter( ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref,targetRef,0.95,true)  ).collect(Collectors.toList());
+
+        System.out.println("above sim level: " +matches2.size());
 
         for (String s : matches2) System.out.println(s);
 
+        System.out.println("Examples from candidate set:");
+
+        int count=0;
+        for(String s: candidates) {
+
+            System.out.println(s);
+
+            count++;
+            if(count > 10 ) break;
+        }
 
     }
 }
