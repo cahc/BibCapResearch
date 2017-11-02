@@ -28,11 +28,17 @@ public class GroupSimilarCitedReferences {
         Object2IntOpenHashMap<String> referenceCounter = new Object2IntOpenHashMap();
         referenceCounter.defaultReturnValue(0);
 
-        if(arg.length != 1) {  System.out.println("Supply name of MVstore DB"); System.exit(0); }
+        if (arg.length != 1) {
+            System.out.println("Supply name of MVstore DB");
+            System.exit(0);
+        }
 
         File check = new File(arg[0]);
 
-        if(!check.exists()) { System.out.println("File dosent exist"); System.exit(0); }
+        if (!check.exists()) {
+            System.out.println("File dosent exist");
+            System.exit(0);
+        }
 
         MVStore store = new MVStore.Builder().cacheSize(200). // 200MB read cache
                 fileName(arg[0]).autoCommitBufferSize(1024). // 1MB write cache
@@ -40,18 +46,18 @@ public class GroupSimilarCitedReferences {
         store.setVersionsToKeep(0);
         store.setReuseSpace(true);
 
-        MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer,BibCapRecord>().keyType(new ObjectDataType()).valueType( new BibCapRecord() ));
+        MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer, BibCapRecord>().keyType(new ObjectDataType()).valueType(new BibCapRecord()));
 
 
         System.out.println("Counting frequencies..");
-        for(Map.Entry<Integer,BibCapRecord> entry : map.entrySet()) {
+        for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
 
             List<String> references = entry.getValue().getCitedReferences();
 
-            if(references.size() == 0) continue;
+            if (references.size() == 0) continue;
 
-            for(String s : references) referenceCounter.addTo(s,1);
+            for (String s : references) referenceCounter.addTo(s, 1);
 
 
         }
@@ -73,8 +79,8 @@ public class GroupSimilarCitedReferences {
                 int val_o1 = o1.getIntValue();
                 int val_o2 = o2.getIntValue();
 
-                if(val_o1 < val_o2) return 1;
-                if(val_o1 > val_o2) return -1;
+                if (val_o1 < val_o2) return 1;
+                if (val_o1 > val_o2) return -1;
 
                 return 0;
 
@@ -84,9 +90,9 @@ public class GroupSimilarCitedReferences {
 
 
         //sorted by insertion order
-        ObjectLinkedOpenHashSet<String> sortedSet = new ObjectLinkedOpenHashSet<>( list.size()+1 );
+        ObjectLinkedOpenHashSet<String> sortedSet = new ObjectLinkedOpenHashSet<>(list.size() + 1);
 
-        for(Object2IntMap.Entry<String> s: list) sortedSet.add( s.getKey() );
+        for (Object2IntMap.Entry<String> s : list) sortedSet.add(s.getKey());
 
         //for GC
         map = null;
@@ -97,18 +103,17 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("max:");
         String targetRef = sortedSet.first();
-        System.out.println(list.get(0).getKey() + " -->" + targetRef);
+        System.out.println(targetRef);
 
 
+        List<String> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef, targetRef, 0.90, true)).collect(Collectors.toList());
 
-        List<String> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef, targetRef , 0.90, true)).collect(Collectors.toList());
-
-        for(String s : matches) System.out.println(s);
-
+        for (String s : matches) System.out.println(s);
 
 
+        System.out.println("Lets try to build an index..");
 
-        }
 
 
     }
+}

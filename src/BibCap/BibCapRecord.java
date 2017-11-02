@@ -84,7 +84,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     }
 
-    public void addCitedReferenceF(String s) {
+    public void addCitedReference(String s) {
 
         bibCapCitedReference.add(s);
     }
