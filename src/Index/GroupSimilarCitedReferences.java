@@ -140,14 +140,14 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("Mappings: " + multimap.size());
 
-        List<String> searchKeys = Ngram.normalizedBeforeNgram(5,targetRef);
+        List<String> searchKeys = Ngram.normalizedBeforeNgram(6,targetRef);
         Set<String> candidates = new HashSet<>();
 
         for(String s :searchKeys) candidates.addAll(  multimap.get(s) );
 
         System.out.println("Nr candidates: " + candidates.size());
 
-        List<String> matches2 = candidates.parallelStream().filter( ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref,targetRef,0.95,true)  ).collect(Collectors.toList());
+        List<String> matches2 = candidates.parallelStream().filter( ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref,targetRef,0.90,true)  ).collect(Collectors.toList());
 
         System.out.println("above sim level: " +matches2.size());
 
