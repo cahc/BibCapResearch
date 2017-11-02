@@ -24,11 +24,18 @@ public class Ngram {
     }
 
 
+public static List<String> normalizedBeforeNgram(int n, String str) {
+
+        str = str.replaceAll(" ","");
+
+        return ngramsOrInput(n, str);
+}
+
 
     public static void main(String[] arg) {
 
 
-        System.out.println( Ngram.ngramsOrInput(3,"helo"));
+        System.out.println( Ngram.ngramsOrInput(6,"SHELDRICK, G 2008 ACTA CRYSTALLOGR A 64"));
 
     }
 

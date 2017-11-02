@@ -3,6 +3,7 @@ package Index;
 import BibCap.BibCapCitedReferenceWithNgram;
 import BibCap.BibCapRecord;
 import Misc.LevenshteinDistance;
+import Misc.Ngram;
 import Misc.ProgressBar;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -113,6 +114,43 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("Lets try to build an index..");
 
+        Object2ObjectOpenHashMap<String,ObjectOpenHashSet<String>> multimap = new Object2ObjectOpenHashMap<>();
+
+        for(String s : sortedSet) {
+
+            List<String> ngrams = Ngram.normalizedBeforeNgram(5,s);
+
+                for(String ngram : ngrams) {
+                    ObjectOpenHashSet<String> set = multimap.get(ngram);
+
+                    if(set != null) {
+
+                        set.add(s);
+                    } else {
+
+                        ObjectOpenHashSet<String> newSet = new ObjectOpenHashSet<>();
+                        newSet.add(s);
+                        multimap.put(ngram,newSet);
+                    }
+
+                }
+
+        }
+
+
+        System.out.println("Mappings: " + multimap.size());
+
+        List<String> searchKeys = Ngram.normalizedBeforeNgram(5,targetRef);
+        Set<String> candidates = new HashSet<>();
+
+        for(String s :searchKeys) candidates.addAll(  multimap.get(s) );
+
+        System.out.println("Nr candidates: " + candidates.size());
+
+
+        List<String> matches2 = candidates.parallelStream().filter( ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref,targetRef,0.95,true)  ).collect(Collectors.toList());
+
+        for (String s : matches2) System.out.println(s);
 
 
     }
