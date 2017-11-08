@@ -14,6 +14,9 @@ public class LevenshteinDistance {
 
         }
 
+
+
+
         double x = 1-minSimilarity;
 
         int s_len = s.length();
@@ -23,6 +26,9 @@ public class LevenshteinDistance {
 
         int threshold =  (int)(Math.ceil(x*max));
 
+
+        //length pruning
+        if( Math.abs( s_len - t_len ) > threshold) return false;
 
         int edits = getLevenshteinDistance(s,s_len,t,t_len,threshold);
 
@@ -41,6 +47,9 @@ public class LevenshteinDistance {
         //Given a similarity threshold [0,1]
         //calculate the max number of edits that are OK before one should give up
 
+
+        //optimization: threshold pruning termination
+        //              length pruning
         double x = 1-minSimilarity;
 
         int s_len = s.length();
@@ -48,8 +57,12 @@ public class LevenshteinDistance {
 
         int max = Math.max(s_len, t_len );
 
+        //threshold for similarity to be >= 0.95
         int threshold =  (int)(Math.ceil(x*max));
 
+
+        //length pruning
+        if( Math.abs( s_len - t_len ) > threshold) return -1;
 
         int edits = getLevenshteinDistance(s,s_len,t,t_len,threshold);
 

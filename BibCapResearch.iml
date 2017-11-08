@@ -11,5 +11,6 @@
     <orderEntry type="library" name="org.lmdbjava:lmdbjava:0.6.0" level="project" />
     <orderEntry type="library" name="org.kie.modules:org-apache-commons-lang3:6.5.0.Final" level="project" />
     <orderEntry type="library" name="it.unimi.dsi:fastutil:8.1.0" level="project" />
+    <orderEntry type="library" name="algs4-1.0.0.0-sources" level="project" />
   </component>
 </module>

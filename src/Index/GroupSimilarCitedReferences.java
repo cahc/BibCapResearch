@@ -102,6 +102,7 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("Unique references: " + sortedSet.size());
 
+        /*
         System.out.println("max:");
         String targetRef = sortedSet.first();
         System.out.println(targetRef);
@@ -110,7 +111,7 @@ public class GroupSimilarCitedReferences {
         List<String> matches = sortedSet.parallelStream().filter(otherRef -> LevenshteinDistance.isAboveSimilarityThreshold(otherRef, targetRef, 0.90, true)).collect(Collectors.toList());
 
         for (String s : matches) System.out.println(s);
-
+*/
 
         System.out.println("Lets try to build an index..");
 
@@ -118,7 +119,7 @@ public class GroupSimilarCitedReferences {
 
         for(String s : sortedSet) {
 
-            List<String> ngrams = Ngram.normalizedBeforeNgram(6,s);
+            List<String> ngrams = Ngram.normalizedBeforeNgram(8,s);
 
                 for(String ngram : ngrams) {
                     ObjectOpenHashSet<String> set = multimap.get(ngram);
@@ -140,29 +141,46 @@ public class GroupSimilarCitedReferences {
 
         System.out.println("Mappings: " + multimap.size());
 
-        List<String> searchKeys = Ngram.normalizedBeforeNgram(6,targetRef);
-        Set<String> candidates = new HashSet<>();
+        ProgressBar progressBar = new ProgressBar();
+        int N = sortedSet.size();
+        int dummy = 0;
+        progressBar.update(0,N);
 
-        for(String s :searchKeys) candidates.addAll(  multimap.get(s) );
 
-        System.out.println("Nr candidates: " + candidates.size());
+        while( !sortedSet.isEmpty() ) {
 
-        List<String> matches2 = candidates.parallelStream().filter( ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref,targetRef,0.90,true)  ).collect(Collectors.toList());
+            String targetRef = sortedSet.first();
 
-        System.out.println("above sim level: " +matches2.size());
+            List<String> searchKeys = Ngram.normalizedBeforeNgram(8, targetRef);
+            Set<String> candidates = new HashSet<>();
 
-        for (String s : matches2) System.out.println(s);
+            for (String s : searchKeys) candidates.addAll(multimap.get(s));
 
-        System.out.println("Examples from candidate set:");
+            //System.out.println("Nr candidates: " + candidates.size());
 
-        int count=0;
-        for(String s: candidates) {
+            List<String> matches2 = candidates.parallelStream().filter(ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref, targetRef, 0.90, false)).collect(Collectors.toList());
 
-            System.out.println(s);
+            int trueMatches = matches2.size();
+           // System.out.println("above sim level: " + matches2.size());
 
-            count++;
-            if(count > 10 ) break;
+            //remove matches from sortedSet
+            sortedSet.removeAll( matches2 );
+
+            //remove from index..(hm?)
+
+         //   for(String s : matches2) {
+
+          //      searchKeys = Ngram.normalizedBeforeNgram(8,s);
+
+           //     for(String key : searchKeys) multimap.get(key).remove(s);
+
+           // }
+
+
+            if(dummy % 200 == 0) {System.out.println("candidate set size was: " +candidates.size() +" and true matches was: " + trueMatches); } progressBar.update(N-sortedSet.size(),N);
+
         }
+
 
     }
 }
