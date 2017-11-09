@@ -1,19 +1,17 @@
 package Index;
 
-import BibCap.BibCapCitedReferenceWithNgram;
 import BibCap.BibCapRecord;
 import Misc.LevenshteinDistance;
-import Misc.Ngram;
 import Misc.ProgressBar;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.type.ObjectDataType;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 public class GroupSimilarCitedReferences {
 
 
-    public static void main(String[] arg) {
+    public static void main(String[] arg) throws IOException {
 
 
         Object2IntOpenHashMap<String> referenceCounter = new Object2IntOpenHashMap();
@@ -119,7 +117,22 @@ public class GroupSimilarCitedReferences {
 
         for(String s : sortedSet) {
 
-            List<String> ngrams = Ngram.normalizedBeforeNgram(8,s);
+            String prefix = s.substring(0,2);
+            ObjectOpenHashSet<String> set = multimap.get(prefix);
+
+            if(set != null) {
+
+                set.add(s);
+            } else {
+
+                ObjectOpenHashSet<String> newSet = new ObjectOpenHashSet<>();
+                newSet.add(s);
+                multimap.put(prefix,newSet);
+            }
+
+
+            /*
+           List<String> ngrams = Ngram.normalizedBeforeNgram(8,s);
 
                 for(String ngram : ngrams) {
                     ObjectOpenHashSet<String> set = multimap.get(ngram);
@@ -136,8 +149,21 @@ public class GroupSimilarCitedReferences {
 
                 }
 
+              */
+
         }
 
+
+        BufferedWriter writer = new BufferedWriter( new FileWriter( new File("uniqueRefs.txt")));
+
+        for(String s : sortedSet) {
+
+            writer.write(s);
+            writer.newLine();
+        }
+
+
+        System.exit(0);
 
         System.out.println("Mappings: " + multimap.size());
 
@@ -151,31 +177,27 @@ public class GroupSimilarCitedReferences {
 
             String targetRef = sortedSet.first();
 
-            List<String> searchKeys = Ngram.normalizedBeforeNgram(8, targetRef);
-            Set<String> candidates = new HashSet<>();
+            //List<String> searchKeys = Ngram.normalizedBeforeNgram(8, targetRef);
 
-            for (String s : searchKeys) candidates.addAll(multimap.get(s));
+            //Set<String> candidates = new HashSet<>();
+
+            //for (String s : searchKeys) candidates.addAll(multimap.get(s));
 
             //System.out.println("Nr candidates: " + candidates.size());
 
-            List<String> matches2 = candidates.parallelStream().filter(ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref, targetRef, 0.90, false)).collect(Collectors.toList());
+            ObjectOpenHashSet<String> candidates = multimap.get(targetRef.substring(0,2));
 
-            int trueMatches = matches2.size();
+            List<String> matches = candidates.parallelStream().filter(ref -> LevenshteinDistance.isAboveSimilarityThreshold(ref, targetRef, 0.90, true)).collect(Collectors.toList());
+
+            int trueMatches = matches.size();
            // System.out.println("above sim level: " + matches2.size());
 
             //remove matches from sortedSet
-            sortedSet.removeAll( matches2 );
+            sortedSet.removeAll( matches );
 
-            //remove from index..(hm?)
+            //remove from multimap
 
-         //   for(String s : matches2) {
-
-          //      searchKeys = Ngram.normalizedBeforeNgram(8,s);
-
-           //     for(String key : searchKeys) multimap.get(key).remove(s);
-
-           // }
-
+            candidates.removeAll( matches );
 
             if(dummy % 200 == 0) {System.out.println("candidate set size was: " +candidates.size() +" and true matches was: " + trueMatches); } progressBar.update(N-sortedSet.size(),N);
 
