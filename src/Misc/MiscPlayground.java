@@ -21,6 +21,14 @@ public class MiscPlayground {
 
        System.out.println( s.substring(0,7)  );
 
+
+       String authorPart = "ab, gris,p p";
+
+
+        String author = authorPart.replaceAll("[, ]","");
+
+
+        System.out.println(author.substring(author.length()-2,author.length()));
     }
 
 

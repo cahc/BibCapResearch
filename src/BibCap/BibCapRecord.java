@@ -27,7 +27,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     String source;
 
-    List<String> bibCapCitedReference = new ArrayList<>();
+    List<BibCapCitedReferenceWithSearchKey> bibCapCitedReference = new ArrayList<>();
     List<String> extractedTerms = new ArrayList<>();
 
     int citationsIncSelf;
@@ -61,7 +61,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
         this.citationsExclSelf = citationsExclSelf;
     }
 
-    public List<String> getCitedReferences() {
+    public List<BibCapCitedReferenceWithSearchKey> getCitedReferences() {
 
         return bibCapCitedReference;
 
@@ -84,7 +84,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     }
 
-    public void addCitedReference(String s) {
+    public void addCitedReference(BibCapCitedReferenceWithSearchKey s) {
 
         bibCapCitedReference.add(s);
     }

@@ -252,7 +252,10 @@ public class BibCapParser {
 
 
                         String okRef =  m.group(0).trim();
-                        bibCapRecord.addCitedReference( okRef  );
+
+                        BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = new BibCapCitedReferenceWithSearchKey(okRef, cited_author,cited_year,cited_work);
+
+                        bibCapRecord.addCitedReference( bibCapCitedReferenceWithSearchKey  );
                         countRecordsWitRef.add(id);
                         goodReferenceWriter.write(okRef);
                         goodReferenceWriter.write(okRef);
@@ -267,7 +270,10 @@ public class BibCapParser {
                         bibCapRecord = bibCapRecordStore.getRecord(id);
 
                         String okRef =  m.group(0).trim();
-                        bibCapRecord.addCitedReference( okRef  );
+
+                        BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = new BibCapCitedReferenceWithSearchKey(okRef, cited_author,cited_year,cited_work);
+
+                        bibCapRecord.addCitedReference( bibCapCitedReferenceWithSearchKey  );
                         countRecordsWitRef.add(id);
                         idOfCurrentFetechedDoc = id;
                         goodReferenceWriter.write(okRef);
@@ -287,8 +293,9 @@ public class BibCapParser {
                 if(idOfCurrentFetechedDoc == id) {
                     String okRef = citedString.toString();
 
+                    BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = new BibCapCitedReferenceWithSearchKey(okRef, cited_author,cited_year,cited_work);
 
-                    bibCapRecord.addCitedReference( okRef );
+                    bibCapRecord.addCitedReference( bibCapCitedReferenceWithSearchKey );
                     goodReferenceWriter.write(okRef);
                     goodReferenceWriter.newLine();
                     countRecordsWitRef.add(id);
@@ -304,7 +311,9 @@ public class BibCapParser {
                     goodReferenceWriter.write(okRef);
                     goodReferenceWriter.newLine();
 
-                    bibCapRecord.addCitedReference( okRef );
+                    BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = new BibCapCitedReferenceWithSearchKey(okRef, cited_author,cited_year,cited_work);
+
+                    bibCapRecord.addCitedReference( bibCapCitedReferenceWithSearchKey );
                     countRecordsWitRef.add(id);
                     idOfCurrentFetechedDoc = id;
 
