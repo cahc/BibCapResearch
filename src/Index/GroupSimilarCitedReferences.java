@@ -3,6 +3,7 @@ package Index;
 import BibCap.BibCapCitedReferenceWithSearchKey;
 import BibCap.BibCapRecord;
 import Misc.LevenshteinDistance;
+import Misc.OSA;
 import Misc.OptimalStringAlignment;
 import Misc.ProgressBar;
 import com.google.common.collect.MultimapBuilder;
@@ -211,10 +212,13 @@ public class GroupSimilarCitedReferences {
             for(int i=0; i<listsOfCandidares.size(); i++) {
 
 
-                //TODO benchmark against Levenshtein
+
                 // List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
 
-                List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> LevenshteinDistance.isAboveSimilarityThreshold( object.getCitedRefString(),target.getCitedRefString(),0.90, false)   ).collect( Collectors.toList() );
+                // List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> LevenshteinDistance.isAboveSimilarityThreshold( object.getCitedRefString(),target.getCitedRefString(),0.90, false)   ).collect( Collectors.toList() );
+
+                //Fastest by a large margin
+                List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OSA.DamuLevSim( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
 
                //REMOVE FROM INDEX STRUCTURE
               Iterator<BibCapCitedReferenceWithSearchKey> iterator = listsOfCandidares.get(i).iterator();
@@ -262,7 +266,7 @@ public class GroupSimilarCitedReferences {
 
             integerCounter++;
 
-            if(dummy >= 1000000) break;
+            //if(dummy >= 1000000) break;
 
         }
 
