@@ -249,6 +249,9 @@ public class GroupSimilarCitedReferences {
 
 
 
+            //TODO check if remove by iterator is faster/slowe than keeping a set or alreadyRemoved
+
+
             for(BibCapCitedReferenceWithSearchKey refs : uniqueMatches) {
 
 
@@ -268,7 +271,7 @@ public class GroupSimilarCitedReferences {
         writer.flush();
         writer.close();
 
-        System.out.println("That took: " + (start - System.currentTimeMillis())/1000.0 ) ;
+        System.out.println("That took: " + (System.currentTimeMillis() -start)/1000.0 ) ;
         System.exit(0);
 
 /*
