@@ -2,9 +2,11 @@ package Index;
 
 import BibCap.BibCapCitedReferenceWithSearchKey;
 import BibCap.BibCapRecord;
+import Misc.OptimalStringAlignment;
 import Misc.ProgressBar;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
+import edu.princeton.cs.algs4.TST;
 import it.unimi.dsi.fastutil.objects.*;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
@@ -106,23 +108,42 @@ public class GroupSimilarCitedReferences {
 
        Iterator<BibCapCitedReferenceWithSearchKey> iterator = citedRefObjSet.iterator();
 
-       while (iterator.hasNext()) {
 
-           BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = iterator.next();
+       while (!citedRefObjSet.isEmpty()) {
 
-           HashSet<BibCapCitedReferenceWithSearchKey> candidates = new HashSet<>();
+           BibCapCitedReferenceWithSearchKey target = citedRefObjSet.iterator().next();
 
-           for(String s : bibCapCitedReferenceWithSearchKey.getKeys() ) candidates.addAll(   multimap.get( s )    );
+           ArrayList<BibCapCitedReferenceWithSearchKey> candidates = new ArrayList<>(200);
+
+           //TODO this is what is taking time..
+          for(String s : target.getKeys() ) candidates.addAll(   multimap.get( s )    );
 
 
-          List<BibCapCitedReferenceWithSearchKey> fake = candidates.parallelStream().filter( bref -> false ).collect(Collectors.toList());
+         Set<BibCapCitedReferenceWithSearchKey> matchedObject = candidates.parallelStream().filter( obj -> OptimalStringAlignment.editDistance(obj.getCitedRefString(), target.getCitedRefString(),2) > -1 ).collect(Collectors.toSet());
 
-           iterator.remove();
+           int size = candidates.size();
+
+           //remove objects in fake from set
+           citedRefObjSet.removeIf( obj -> matchedObject.contains(obj));
+
+           //TODO remove object from fale in multimap to
+
+           for(BibCapCitedReferenceWithSearchKey matchedRefObj : matchedObject) {
+
+
+               for(String key : matchedRefObj.getKeys()) multimap.remove(key,matchedRefObj);
+
+           }
+
+
+          // iterator.remove();
 
           dummy++;
           if( dummy % 200 == 0) {
 
               progressBar.update(N-citedRefObjSet.size(),N);
+
+              TST<String> hej = new TST<>();
 
           }
        }

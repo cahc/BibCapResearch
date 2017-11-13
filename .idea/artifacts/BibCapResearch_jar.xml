@@ -35,6 +35,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/error_prone_annotations-2.0.18.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/j2objc-annotations-1.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/animal-sniffer-annotations-1.14.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="F:/algs4-1.0.0.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
