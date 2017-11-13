@@ -210,7 +210,8 @@ public class GroupSimilarCitedReferences {
             for(int i=0; i<listsOfCandidares.size(); i++) {
 
 
-               List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editDistance( object.getCitedRefString(),target.getCitedRefString(),2 ) > -1  ).collect( Collectors.toList() );
+                //TODO benchmark against Levenshtin
+               List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
 
                //REMOVE FROM INDEX STRUCTURE
               Iterator<BibCapCitedReferenceWithSearchKey> iterator = listsOfCandidares.get(i).iterator();
@@ -233,7 +234,7 @@ public class GroupSimilarCitedReferences {
 
 
             dummy++;
-            if( dummy % 1000 == 0) {
+            if( dummy % 2000 == 0) {
 
                 progressBar.update(alreadyRemoved.size(), N);
                 System.out.println(target +" " + uniqueMatches.size() + " was the uniq size. Iterator index now: " +dummy);
@@ -249,6 +250,7 @@ public class GroupSimilarCitedReferences {
 
 
                 writer.write(refs.getCitedRefString() +"\t" + integerCounter);
+                writer.newLine();
 
             }
 
@@ -260,7 +262,7 @@ public class GroupSimilarCitedReferences {
 
         writer.flush();
         writer.close();
-        
+
         System.exit(0);
 
 /*
