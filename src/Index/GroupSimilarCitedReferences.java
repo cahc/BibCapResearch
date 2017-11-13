@@ -2,6 +2,7 @@ package Index;
 
 import BibCap.BibCapCitedReferenceWithSearchKey;
 import BibCap.BibCapRecord;
+import Misc.LevenshteinDistance;
 import Misc.OptimalStringAlignment;
 import Misc.ProgressBar;
 import com.google.common.collect.MultimapBuilder;
@@ -166,7 +167,7 @@ public class GroupSimilarCitedReferences {
 
 
         System.out.println("Candidate generation");
-
+        long start = System.currentTimeMillis();
 
         ProgressBar progressBar = new ProgressBar();
         int N = orderedLinkedListUnique.size();
@@ -211,7 +212,9 @@ public class GroupSimilarCitedReferences {
 
 
                 //TODO benchmark against Levenshtein
-               List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
+                // List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
+
+                List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> LevenshteinDistance.isAboveSimilarityThreshold( object.getCitedRefString(),target.getCitedRefString(),0.90, false)   ).collect( Collectors.toList() );
 
                //REMOVE FROM INDEX STRUCTURE
               Iterator<BibCapCitedReferenceWithSearchKey> iterator = listsOfCandidares.get(i).iterator();
@@ -256,6 +259,8 @@ public class GroupSimilarCitedReferences {
 
             integerCounter++;
 
+            if(dummy >= 1000000) break;
+
         }
 
 
@@ -263,6 +268,7 @@ public class GroupSimilarCitedReferences {
         writer.flush();
         writer.close();
 
+        System.out.println("That took: " + (start - System.currentTimeMillis())/1000.0 ) ;
         System.exit(0);
 
 /*
