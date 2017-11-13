@@ -40,6 +40,7 @@ import static com.google.common.primitives.Shorts.checkedCast;
 
  */
 
+
 public class OptimalStringAlignment {
 
 
@@ -87,6 +88,31 @@ public class OptimalStringAlignment {
         }
 
     };
+
+
+
+
+    public static double editSimilarity(CharSequence s, CharSequence t, double simThreshold) {
+
+
+        double x = 1-simThreshold;
+
+        int s_len = s.length();
+        int t_len = t.length();
+
+        int max = Math.max(s_len, t_len );
+
+        //threshold for similarity to be >= 0.95
+        int threshold =  (int)(Math.ceil(x*max));
+
+        int edits = editDistance(s,t,threshold);
+
+        if(edits == -1 || edits >= threshold) return -1;
+
+        return 1-(edits/(double)max);
+
+    }
+
 
 
 
@@ -343,7 +369,7 @@ public class OptimalStringAlignment {
 
     public static void main(String[] arg) {
 
-        System.out.println( OptimalStringAlignment.editDistance("abab","baba",3) );
+        System.out.println( OptimalStringAlignment.editSimilarity("svinetLeveraaaaaaabbbb","svinetLeveaaaaaaabbbb",0.95) );
 
 
 

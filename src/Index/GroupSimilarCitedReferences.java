@@ -2,6 +2,7 @@ package Index;
 
 import BibCap.BibCapCitedReferenceWithSearchKey;
 import BibCap.BibCapRecord;
+import Misc.LevenshteinDistance;
 import Misc.OptimalStringAlignment;
 import Misc.ProgressBar;
 import com.google.common.collect.MultimapBuilder;
@@ -32,6 +33,7 @@ public class GroupSimilarCitedReferences {
 
 
         Object2IntOpenHashMap<BibCapCitedReferenceWithSearchKey> referenceCounter = new Object2IntOpenHashMap();
+
         referenceCounter.defaultReturnValue(0);
 
         if (arg.length != 1) {
@@ -59,28 +61,220 @@ public class GroupSimilarCitedReferences {
 
 
         System.out.println("Reading BibCapRefWithSearchKeys..");
+        System.out.println("And counting occurrences..");
 
-        Set<BibCapCitedReferenceWithSearchKey> citedRefObjSet = new HashSet<>();
+
+       // Set<BibCapCitedReferenceWithSearchKey> citedRefObjSet = new HashSet<>();
 
         for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
 
-            citedRefObjSet.addAll(  entry.getValue().getCitedReferences() );
+            for (BibCapCitedReferenceWithSearchKey s : entry.getValue().getCitedReferences()) referenceCounter.addTo(s, 1);
 
 
-           // List<BibCapCitedReferenceWithSearchKey> references = entry.getValue().getCitedReferences();
+        }
 
-          //  if (references.size() == 0) continue;
+        System.out.println("Closing database");
+        store.close();
 
-         //   for (BibCapCitedReferenceWithSearchKey s : references) referenceCounter.addTo(s, 1);
+        Object2IntMap.FastEntrySet<BibCapCitedReferenceWithSearchKey> entrySet = referenceCounter.object2IntEntrySet();
 
+        List<Object2IntMap.Entry<BibCapCitedReferenceWithSearchKey>> list = new ArrayList<>( entrySet );
+
+        System.out.println("Sorting..");
+        Collections.sort(list, new Comparator<Object2IntMap.Entry<BibCapCitedReferenceWithSearchKey>>() {
+            @Override
+            public int compare(Object2IntMap.Entry<BibCapCitedReferenceWithSearchKey> o1, Object2IntMap.Entry<BibCapCitedReferenceWithSearchKey> o2) {
+
+                int val_o1 = o1.getIntValue();
+                int val_o2 = o2.getIntValue();
+
+                if (val_o1 < val_o2) return 1;
+                if (val_o1 > val_o2) return -1;
+
+                return 0;
+
+
+            }
+        });
+
+        referenceCounter = null;
+        System.gc();
+
+
+        LinkedList<BibCapCitedReferenceWithSearchKey> orderedLinkedListUnique = new LinkedList<>();
+
+        for(Object2IntMap.Entry<BibCapCitedReferenceWithSearchKey> obj : list) {
+
+            orderedLinkedListUnique.add(obj.getKey());
+        }
+
+        list = null;
+        System.gc();
+
+
+        System.out.println("Getting and sorting searchKeys");
+
+        TreeSet<String> uniqueKeys = new TreeSet<>();
+
+        for(BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey : orderedLinkedListUnique) {
+
+            for(String s : bibCapCitedReferenceWithSearchKey.getKeys()) uniqueKeys.add( s ) ;
+        }
+
+
+        String[] keys = new String[uniqueKeys.size()];
+        Iterator<String> iter = uniqueKeys.iterator();
+        int index = 0;
+        while(iter.hasNext()) {
+
+            keys[index] = iter.next();
+            index++;
+        }
+
+        uniqueKeys = null;
+        System.gc();
+
+        System.out.println("Sorted keys now in an array of length: " + keys.length);
+
+        LinkedList[] collectionOfRefObjects = new LinkedList[ keys.length ];
+
+        for(int i=0; i<collectionOfRefObjects.length; i++) collectionOfRefObjects[i] = new LinkedList<BibCapCitedReferenceWithSearchKey>();
+
+        System.out.println("now creating simple index structure..");
+
+
+        for(BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey : orderedLinkedListUnique) {
+
+
+            for(String key : bibCapCitedReferenceWithSearchKey.getKeys() ) {
+
+                int indexIntoArray = Arrays.binarySearch(keys,key);
+
+                collectionOfRefObjects[indexIntoArray].add( bibCapCitedReferenceWithSearchKey   );
+
+
+            }
+
+        }
+
+
+        // LinkedList set of all Refenrence objects
+
+        // keyes : an String[] array for length 2759610 containing the unique search Strings e.g.,  s[aa]200e[ws]
+
+        //collectionOfRefObjects : an set{] array of same length as keyes, binarySearch(key) on keys gives index into this array given a set of matching collectionOfRefObjects
+
+
+        System.out.println("Candidate generation");
+        long start = System.currentTimeMillis();
+
+        ProgressBar progressBar = new ProgressBar();
+        int N = orderedLinkedListUnique.size();
+        int dummy = 0;
+        progressBar.update(0,N);
+
+
+        HashSet<BibCapCitedReferenceWithSearchKey> alreadyRemoved = new HashSet<>();
+
+
+        BufferedWriter writer = new BufferedWriter( new FileWriter( new File("referencesToIntegers.txt") ));
+        int integerCounter = 0;
+
+        while(!orderedLinkedListUnique.isEmpty() ) {
+
+
+            BibCapCitedReferenceWithSearchKey target = orderedLinkedListUnique.getFirst();
+
+            if(alreadyRemoved.contains(target)) {
+
+                orderedLinkedListUnique.removeFirst();
+                dummy++;
+                continue;
+            }
+
+            List<List<BibCapCitedReferenceWithSearchKey>> listsOfCandidares = new ArrayList<>();
+
+
+            for(String key : target.getKeys()) {
+
+                int ind = Arrays.binarySearch(keys,key);
+
+                listsOfCandidares.add(  collectionOfRefObjects[ind]    );
+
+            }
+
+            //check if they are above threshold
+
+            Set<BibCapCitedReferenceWithSearchKey> uniqueMatches = new HashSet<>();
+
+            for(int i=0; i<listsOfCandidares.size(); i++) {
+
+
+                //TODO benchmark against Levenshtein
+                // List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
+
+                List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> LevenshteinDistance.isAboveSimilarityThreshold( object.getCitedRefString(),target.getCitedRefString(),0.90, false)   ).collect( Collectors.toList() );
+
+               //REMOVE FROM INDEX STRUCTURE
+              Iterator<BibCapCitedReferenceWithSearchKey> iterator = listsOfCandidares.get(i).iterator();
+
+               while(iterator.hasNext()) {
+
+                   BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = iterator.next();
+
+                   if( matches.contains( bibCapCitedReferenceWithSearchKey ) ) iterator.remove();
+
+               }
+
+
+               uniqueMatches.addAll( matches );
+            }
+
+
+            //REMOVE FROM citedRefObjSet
+        //    linkedListUnique.removeIf( obj -> uniqueMatches.contains(obj) );
+
+
+            dummy++;
+            if( dummy % 2000 == 0) {
+
+                progressBar.update(alreadyRemoved.size(), N);
+                System.out.println(target +" " + uniqueMatches.size() + " was the uniq size. Iterator index now: " +dummy);
+            }
+
+
+            alreadyRemoved.addAll(  uniqueMatches );
+            orderedLinkedListUnique.removeFirst();
+
+
+
+            //TODO check if remove by iterator is faster/slowe than keeping a set or alreadyRemoved
+
+
+            for(BibCapCitedReferenceWithSearchKey refs : uniqueMatches) {
+
+
+                writer.write(refs.getCitedRefString() +"\t" + integerCounter);
+                writer.newLine();
+
+            }
+
+            integerCounter++;
+
+            if(dummy >= 1000000) break;
 
         }
 
 
 
-        System.out.println("Closing database");
-        store.close();
+        writer.flush();
+        writer.close();
+
+        System.out.println("That took: " + (System.currentTimeMillis() -start)/1000.0 ) ;
+        System.exit(0);
+
+/*
 
         System.out.println("Creating multimap");
 
@@ -101,10 +295,10 @@ public class GroupSimilarCitedReferences {
 
 
 
-        ProgressBar progressBar = new ProgressBar();
+        ProgressBar progressBar2 = new ProgressBar();
         int N = citedRefObjSet.size();
         int dummy = 0;
-        progressBar.update(0,N);
+        progressBar2.update(0,N);
 
        Iterator<BibCapCitedReferenceWithSearchKey> iterator = citedRefObjSet.iterator();
 
@@ -141,15 +335,16 @@ public class GroupSimilarCitedReferences {
           dummy++;
           if( dummy % 200 == 0) {
 
-              progressBar.update(N-citedRefObjSet.size(),N);
+              progressBar2.update(N-citedRefObjSet.size(),N);
 
-              TST<String> hej = new TST<>();
 
           }
        }
 
 
 
+
+  */
         /*
         Object2IntMap.FastEntrySet<BibCapCitedReferenceWithSearchKey> entrySet = referenceCounter.object2IntEntrySet();
 
