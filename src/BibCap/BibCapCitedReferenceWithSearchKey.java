@@ -1,9 +1,8 @@
 package BibCap;
 
 import java.io.Serializable;
-import java.time.Year;
 import java.util.Arrays;
-import java.util.List;
+
 
 public class BibCapCitedReferenceWithSearchKey implements Serializable {
 

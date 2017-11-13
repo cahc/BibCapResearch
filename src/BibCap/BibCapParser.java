@@ -207,9 +207,9 @@ public class BibCapParser {
             Integer id = Integer.valueOf(splitted[0]);
 
 
-            String cited_author = splitted[5];
+            String cited_author = splitted[5].toUpperCase(); //sometimes the strings are mixed
             String cited_year = splitted[6];
-            String cited_work = splitted[7];
+            String cited_work = splitted[7].toUpperCase(); //sometimes the strings are mixed
             String cited_volume = splitted[8];
             String cited_page = splitted[9];
 

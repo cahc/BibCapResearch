@@ -2,9 +2,9 @@ package Index;
 
 import BibCap.BibCapCitedReferenceWithSearchKey;
 import BibCap.BibCapRecord;
-import Misc.LevenshteinDistance;
-import Misc.OptimalStringAlignment;
 import Misc.ProgressBar;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import it.unimi.dsi.fastutil.objects.*;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
@@ -16,6 +16,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
+import static com.google.common.collect.MultimapBuilder.*;
 
 /**
  * Created by crco0001 on 10/31/2017.
@@ -50,22 +53,83 @@ public class GroupSimilarCitedReferences {
         MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer, BibCapRecord>().keyType(new ObjectDataType()).valueType(new BibCapRecord()));
 
 
-        System.out.println("Counting frequencies..");
+        //System.out.println("Counting frequencies..");
+
+
+        System.out.println("Reading BibCapRefWithSearchKeys..");
+
+        Set<BibCapCitedReferenceWithSearchKey> citedRefObjSet = new HashSet<>();
+
         for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
 
-            List<BibCapCitedReferenceWithSearchKey> references = entry.getValue().getCitedReferences();
+            citedRefObjSet.addAll(  entry.getValue().getCitedReferences() );
 
-            if (references.size() == 0) continue;
 
-            for (BibCapCitedReferenceWithSearchKey s : references) referenceCounter.addTo(s, 1);
+           // List<BibCapCitedReferenceWithSearchKey> references = entry.getValue().getCitedReferences();
+
+          //  if (references.size() == 0) continue;
+
+         //   for (BibCapCitedReferenceWithSearchKey s : references) referenceCounter.addTo(s, 1);
 
 
         }
 
+
+
         System.out.println("Closing database");
         store.close();
 
+        System.out.println("Creating multimap");
+
+
+       SetMultimap<String,BibCapCitedReferenceWithSearchKey> multimap  = MultimapBuilder.hashKeys().hashSetValues().build();
+
+       for(BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey : citedRefObjSet ) {
+
+
+           for(String s : bibCapCitedReferenceWithSearchKey.getKeys() ) multimap.put(s,bibCapCitedReferenceWithSearchKey);
+
+
+       }
+
+        System.out.println("unique mappings: " + multimap.asMap().size());
+
+        System.out.println("non unique mappings: " + multimap.size());
+
+
+
+        ProgressBar progressBar = new ProgressBar();
+        int N = citedRefObjSet.size();
+        int dummy = 0;
+        progressBar.update(0,N);
+
+       Iterator<BibCapCitedReferenceWithSearchKey> iterator = citedRefObjSet.iterator();
+
+       while (iterator.hasNext()) {
+
+           BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = iterator.next();
+
+           HashSet<BibCapCitedReferenceWithSearchKey> candidates = new HashSet<>();
+
+           for(String s : bibCapCitedReferenceWithSearchKey.getKeys() ) candidates.addAll(   multimap.get( s )    );
+
+
+          List<BibCapCitedReferenceWithSearchKey> fake = candidates.parallelStream().filter( bref -> false ).collect(Collectors.toList());
+
+           iterator.remove();
+
+          dummy++;
+          if( dummy % 200 == 0) {
+
+              progressBar.update(N-citedRefObjSet.size(),N);
+
+          }
+       }
+
+
+
+        /*
         Object2IntMap.FastEntrySet<BibCapCitedReferenceWithSearchKey> entrySet = referenceCounter.object2IntEntrySet();
 
 
@@ -99,8 +163,9 @@ public class GroupSimilarCitedReferences {
         map = null;
         list = null;
         System.gc();
+*/
 
-        System.out.println("Unique references: " + sortedSet.size());
+       // System.out.println("Unique references: " + sortedSet.size());
 
         /*
         System.out.println("max:");
@@ -113,8 +178,10 @@ public class GroupSimilarCitedReferences {
         for (String s : matches) System.out.println(s);
 */
 
-        System.out.println("Lets try to build an index..");
 
+
+
+        /*
         Object2ObjectOpenHashMap<String,ObjectOpenHashSet<BibCapCitedReferenceWithSearchKey>> multimap = new Object2ObjectOpenHashMap<>();
 
         for(BibCapCitedReferenceWithSearchKey s : sortedSet) {
@@ -138,6 +205,8 @@ public class GroupSimilarCitedReferences {
             }
 
         }
+
+
 
 
 
@@ -171,13 +240,13 @@ public class GroupSimilarCitedReferences {
             //remove matches from sortedSet
             sortedSet.removeAll( matches );
 
-            //remove from multimap
-
-            //TODO
 
             if(dummy % 300 == 0) {System.out.println("candidate set size was: " +candidates.size() +" and true matches was: " + trueMatches); for(BibCapCitedReferenceWithSearchKey s : matches) System.out.println(s); System.out.println(); } progressBar.update(N-sortedSet.size(),N);
 
+
+
         }
+*/
 
 
     }
