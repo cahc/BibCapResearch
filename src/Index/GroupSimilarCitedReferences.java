@@ -210,7 +210,7 @@ public class GroupSimilarCitedReferences {
             for(int i=0; i<listsOfCandidares.size(); i++) {
 
 
-                //TODO benchmark against Levenshtin
+                //TODO benchmark against Levenshtein
                List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
 
                //REMOVE FROM INDEX STRUCTURE
