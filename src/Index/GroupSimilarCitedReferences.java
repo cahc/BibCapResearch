@@ -258,7 +258,9 @@ public class GroupSimilarCitedReferences {
 
 
 
-
+        writer.flush();
+        writer.close();
+        
         System.exit(0);
 
 /*
