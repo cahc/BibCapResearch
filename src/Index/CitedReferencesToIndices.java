@@ -2,13 +2,8 @@ package Index;
 
 import BibCap.BibCapCitedReferenceWithSearchKey;
 import BibCap.BibCapRecord;
-import Misc.LevenshteinDistance;
 import Misc.OSA;
-import Misc.OptimalStringAlignment;
 import Misc.ProgressBar;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.SetMultimap;
-import edu.princeton.cs.algs4.TST;
 import it.unimi.dsi.fastutil.objects.*;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
@@ -27,7 +22,7 @@ import static com.google.common.collect.MultimapBuilder.*;
 /**
  * Created by crco0001 on 10/31/2017.
  */
-public class GroupSimilarCitedReferences {
+public class CitedReferencesToIndices {
 
 
     public static void main(String[] arg) throws IOException {
@@ -204,6 +199,7 @@ public class GroupSimilarCitedReferences {
         while(!orderedLinkedListUnique.isEmpty() ) {
 
 
+
             BibCapCitedReferenceWithSearchKey target = orderedLinkedListUnique.getFirst();
 
            if(alreadyRemoved.contains(target)) {
@@ -232,6 +228,9 @@ public class GroupSimilarCitedReferences {
 
 
 
+
+                //TODO reasonable simThreshold? average cited ctring is approx 35 signs..
+
                 // List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> OptimalStringAlignment.editSimilarity( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
 
                 // List<BibCapCitedReferenceWithSearchKey> matches = listsOfCandidares.get(i).stream().parallel().filter( object -> LevenshteinDistance.isAboveSimilarityThreshold( object.getCitedRefString(),target.getCitedRefString(),0.90, false)   ).collect( Collectors.toList() );
@@ -239,29 +238,13 @@ public class GroupSimilarCitedReferences {
                 //Fastest by a large margin
                 List<BibCapCitedReferenceWithSearchKey> matches = listOfListsWithCandidates.get(i).stream().parallel().filter( object -> OSA.DamuLevSim( object.getCitedRefString(),target.getCitedRefString(),0.90 ) > -1  ).collect( Collectors.toList() );
 
-               //TODO BUGG HERE! REMOVE FROM INDEX STRUCTURE
-
-                /* //////////////////OLD REMOVE FROM INDEX STRUCTURE////////////////////////////
-              Iterator<BibCapCitedReferenceWithSearchKey> iterator = listOfListsWithCandidates.get(i).iterator();
-
-               while(iterator.hasNext()) {
-
-                   BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = iterator.next();
-
-                   if( matches.contains( bibCapCitedReferenceWithSearchKey ) ) {   iterator.remove(); }
-
-               }
-
-               */
-
-
 
                uniqueMatches.addAll( matches );
             }
 
 
 
-            ///////////////NEW REMOVE FROM INDEX STRUCTIRE///////////////////////////////
+            /////////////// REMOVE FROM INDEX STRUCTURE///////////////////////////////
 
 
             for(BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey : uniqueMatches ) {
@@ -279,13 +262,6 @@ public class GroupSimilarCitedReferences {
                 }
 
             }
-
-
-
-
-
-
-
 
             ////////////////////////////////////////////////////////////////////////////////
 
