@@ -41,7 +41,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms;
 
     }
 
