@@ -18,6 +18,9 @@ import java.util.Set;
 /**
  * Created by crco0001 on 10/26/2017.
  */
+
+
+/*
 public class PlayGroundBibCapReader {
 
 
@@ -50,19 +53,6 @@ public class PlayGroundBibCapReader {
         Set<String> stopwords = rake.loadStopWordList(true);
         UEALite stemmer = new UEALite();
 
-
-/*
-        BibCapRecord record = map.get(14318771);
-
-        System.out.println(record.getTitle());
-        rake.getTokens(record.getTitle());
-
-        System.out.println(record.abstractText);
-
-        rake.getTokens(record.getAbstractText());
-        //TODO fix outputs empty/null tokens
-
-*/
 
 
         ProgressBar bar = new ProgressBar();
@@ -117,8 +107,6 @@ public class PlayGroundBibCapReader {
 
 
 
-
-
-
-
 }
+
+*/

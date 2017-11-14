@@ -1,6 +1,7 @@
 package Index;
 
 import BibCap.BibCapRecord;
+import Misc.Ngram;
 import Misc.ProgressBar;
 import NLP.RAKE;
 import NLP.Stemmer.UEALite;
@@ -68,7 +69,7 @@ public class TermsToIndices {
 
         ProgressBar bar = new ProgressBar();
 
-        BufferedWriter bufferedWriter = new BufferedWriter( new FileWriter(new File("TermExtractorTest.txt")));
+        BufferedWriter bufferedWriter = new BufferedWriter( new FileWriter(new File("TermExtractorTestWith2grams.txt")));
 
         int totalN = map.size();
         bar.update(0, totalN );
@@ -89,16 +90,47 @@ public class TermsToIndices {
 
             if(title != null) {
                List<String> keywordsFromTitle =  rake.getKeyWords(title,false,stopwords,stemmer);
-               for(String s :keywordsFromTitle) { bufferedWriter.write( s ); bufferedWriter.newLine(); }
+               for(String s :keywordsFromTitle) {
+
+
+                   bufferedWriter.write( s );
+                   bufferedWriter.newLine();
+
+                   if(Ngram.countWords(s) > 2) {
+
+                       String[] extracted2grams = Ngram.wordNgrams(s,2);
+
+                       for(String s1 : extracted2grams) { bufferedWriter.write(s1+"DEBUGG2GRAM"); bufferedWriter.newLine(); }
+                   }
+
+
+
+
+               }
 
             }
+
+
             if(summary != null) {
                 List<String> keywordsFromAbstract = rake.getKeyWords(summary, true, stopwords, stemmer);
+                for(String s : keywordsFromAbstract)  {
 
-                for(String s : keywordsFromAbstract)  { bufferedWriter.write(s); bufferedWriter.newLine(); }
+                    bufferedWriter.write(s);
+                    bufferedWriter.newLine();
+
+                    if(Ngram.countWords(s) > 2) {
+
+                        String[] extracted2grams = Ngram.wordNgrams(s,2);
+
+                        for(String s1 : extracted2grams) { bufferedWriter.write(s1+"DEBUGG2GRAM"); bufferedWriter.newLine(); }
+
+                    }
+
+                }
+
+
 
             }
-
 
             counter++;
 

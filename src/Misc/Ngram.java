@@ -1,10 +1,35 @@
 package Misc;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Ngram {
+
+
+    public static int countWords(String string) {
+
+        return ( StringUtils.countMatches(string," ") + 1 );
+    }
+
+
+    public static String[] wordNgrams(String s, int len) {
+        String[] parts = s.split(" ");
+        String[] result = new String[parts.length - len + 1];
+        for(int i = 0; i < parts.length - len + 1; i++) {
+            StringBuilder sb = new StringBuilder();
+            for(int k = 0; k < len; k++) {
+                if(k > 0) sb.append(' ');
+                sb.append(parts[i+k]);
+            }
+            result[i] = sb.toString();
+        }
+        return result;
+    }
+
 
 
     public static List<String> ngramsOrInput(int n, String str) {
@@ -34,8 +59,8 @@ public static List<String> normalizedBeforeNgram(int n, String str) {
 
     public static void main(String[] arg) {
 
-
-        System.out.println( Ngram.ngramsOrInput(6,"SHELDRICK, G 2008 ACTA CRYSTALLOGR A 64"));
+        System.out.println( countWords("HELLO") );
+        System.out.println( Arrays.toString(Ngram.wordNgrams("HELLO ASS MONGER TESTER",2) ));
 
     }
 
