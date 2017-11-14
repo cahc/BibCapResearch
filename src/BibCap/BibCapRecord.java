@@ -7,6 +7,7 @@ import org.h2.mvstore.type.DataType;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -44,7 +45,21 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     }
 
+    public void addExtractedTerm(String term) {
 
+        this.extractedTerms.add(term);
+    }
+
+    public void addAllExtractedTerms(Collection<String> terms) {
+
+        this.extractedTerms.addAll(terms);
+
+    }
+
+    public List<String> getExtractedTerms() {
+
+        return this.extractedTerms;
+    }
     public int getCitationsIncSelf() {
         return citationsIncSelf;
     }

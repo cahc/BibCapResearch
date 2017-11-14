@@ -1,6 +1,8 @@
 package BibCap;
 
 import Misc.Ngram;
+import NLP.RAKE;
+import NLP.Stemmer.UEALite;
 
 import java.io.*;
 import java.util.*;
@@ -72,8 +74,15 @@ public class BibCapParser {
     public void parse(BibCapRecordStore bibCapRecordStore) throws IOException {
 
 
+        System.out.println("Loading Rake..");
+        RAKE rake = new RAKE();
+        Set<String> stopwords = rake.loadStopWordList(true);
+        UEALite stemmer = new UEALite();
+
+
 
         System.out.println("Getting doc_id, UT, title and source in pass one..");
+        System.out.println("Running custom RAKE keyword extraction algorithm on title");
         BufferedReader reader = new BufferedReader(new FileReader(this.publ));
 
         boolean firstline = true;
@@ -99,6 +108,26 @@ public class BibCapParser {
             biBCapRecord.setTitle(title);
             biBCapRecord.setSource(source);
 
+
+            if(title != null) {
+                List<String> keywordsFromTitle =  rake.getKeyWords(title,false,stopwords,stemmer);
+                for(String s :keywordsFromTitle) {
+
+                    biBCapRecord.addExtractedTerm( s );
+
+                    if(Ngram.countWords(s) > 2) {
+
+                        String[] extracted2grams = Ngram.wordNgrams(s,2);
+
+                        biBCapRecord.addAllExtractedTerms( Arrays.asList(extracted2grams) );
+                    }
+
+
+                }
+
+            }
+
+
             bibCapRecordStore.putRecord(doc_id, biBCapRecord);
 
             orderedKeySet.add(doc_id);
@@ -109,6 +138,7 @@ public class BibCapParser {
         System.out.println("Records created in pass 1: " + bibCapRecordStore.size());
 
         System.out.println("Getting abstracts in pass two..");
+
 
         reader.close();
 
@@ -160,19 +190,39 @@ public class BibCapParser {
 
 
 
+        System.out.println("Running RAKE on abstracts..");
         for (Integer key : orderedKeySet) {
 
             BibCapRecord record = bibCapRecordStore.getRecord(key);
 
             record.createFullAbstract();
 
+            String summary = record.getAbstractText();
+
+            if(summary != null) {
+                List<String> keywordsFromAbstract = rake.getKeyWords(summary, true, stopwords, stemmer);
+                for(String s : keywordsFromAbstract)  {
+
+                    record.addExtractedTerm(s);
+
+                    if(Ngram.countWords(s) > 2) {
+
+                        String[] extracted2grams = Ngram.wordNgrams(s,2);
+
+                        record.addAllExtractedTerms( Arrays.asList(extracted2grams) );
+
+                    }
+
+                }
+
+
+            }
+
+
             bibCapRecordStore.putRecord(key, record);
 
 
         }
-
-
-
 
 
         System.out.println("Abstracts added to " + countRecordsWitAbstract.size() + " records in pass two");
@@ -181,6 +231,7 @@ public class BibCapParser {
 
 
         System.out.println("Getting cited references in pass 3..");
+        System.out.println("Creating 4 indexing keys per cited reference..");
 
 
         reader = new BufferedReader(new FileReader(this.citedRefs));

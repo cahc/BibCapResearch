@@ -100,7 +100,7 @@ public class TermsToIndices {
 
                        String[] extracted2grams = Ngram.wordNgrams(s,2);
 
-                       for(String s1 : extracted2grams) { bufferedWriter.write(s1+"DEBUGG2GRAM"); bufferedWriter.newLine(); }
+                       for(String s1 : extracted2grams) { bufferedWriter.write(s1); bufferedWriter.newLine(); }
                    }
 
 
@@ -122,7 +122,7 @@ public class TermsToIndices {
 
                         String[] extracted2grams = Ngram.wordNgrams(s,2);
 
-                        for(String s1 : extracted2grams) { bufferedWriter.write(s1+"DEBUGG2GRAM"); bufferedWriter.newLine(); }
+                        for(String s1 : extracted2grams) { bufferedWriter.write(s1); bufferedWriter.newLine(); }
 
                     }
 
