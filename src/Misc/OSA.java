@@ -280,9 +280,15 @@ public class OSA {
     public static void main(String[] arg) {
 
 
-        System.out.println( OSA.DamLev("Apan oal lever1","Apan ola leve1r",4) );
+       String s1 =  "SHELDRICK, G 2008 ACTA CRYSTALLOGR A 64 A112";
+        String s2 =  "SHELDRICK, G 2008 ACTA CRYSTALLOGR A 64 211";
+        String s3 =  "SHELDRICK, G 2008 ACTA CRYSTALLOGR A 64 122";
 
-        System.out.println( OSA.DamuLevSim("Apan oal lever1","Apan ola leve1r",0.80) );
+        String orig = "SHELDRICK, G 2008 ACTA CRYSTALLOGR A 1 64 112";
+
+        System.out.println( OSA.DamLev(s2,orig,5) );
+
+        System.out.println( OSA.DamuLevSim(s2,orig,0.90) );
 
     }
 
