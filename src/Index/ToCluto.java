@@ -61,7 +61,8 @@ public class ToCluto {
 
             String[] part = line.split("\t");
 
-            citedRefToIndices.put(part[0], (int)Integer.valueOf(part[1])   );
+            //dimension indices start at 1, not zero
+            citedRefToIndices.put(part[0], (int)Integer.valueOf(part[1])+1   );
 
         }
 
@@ -77,7 +78,7 @@ public class ToCluto {
         MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer, BibCapRecord>().keyType(new ObjectDataType()).valueType(new BibCapRecord()));
 
 
-
+        int maxDim = -99;
         for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
            Int2FloatOpenHashMap dimToOccurences = new Int2FloatOpenHashMap(); //TODO why float here?
@@ -85,12 +86,14 @@ public class ToCluto {
             BibCapRecord bibCapRecord = entry.getValue();
             List<BibCapCitedReferenceWithSearchKey> references = bibCapRecord.getCitedReferences();
 
+
             for(BibCapCitedReferenceWithSearchKey ref : references) {
 
 
                    int dim =  citedRefToIndices.getInt( ref.getCitedRefString() );
                    if(dim == -1 ) {System.out.println("Dim -1, should not have happened! Aborting"); System.exit(0); }
 
+                   if(dim > maxDim) maxDim = dim;
                    dimToOccurences.addTo(dim,1);
 
 
@@ -106,6 +109,8 @@ public class ToCluto {
             collectionOfSparseDoc.add(sparseDoc);
 
         }
+
+        System.out.println("Max dim (one indexed) is: " +  maxDim );
 
 
         int nrows = collectionOfSparseDoc.size();
