@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * Created by crco0001 on 10/26/2017.
  */
-public class TermsToIndices {
+public class WriteTermsToIndices {
 
 
     public static void main(String[] arg) throws IOException {

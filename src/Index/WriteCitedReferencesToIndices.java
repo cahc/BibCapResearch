@@ -23,7 +23,7 @@ import static com.google.common.collect.MultimapBuilder.*;
 /**
  * Created by crco0001 on 10/31/2017.
  */
-public class CitedReferencesToIndices {
+public class WriteCitedReferencesToIndices {
 
 
     public static void main(String[] arg) throws IOException {
