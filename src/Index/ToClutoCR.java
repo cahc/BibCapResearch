@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Created by crco0001 on 11/15/2017.
  */
-public class ToCluto {
+public class ToClutoCR {
 
     //read in data and write a sparse representation according to the cluto file format
     public static void main(String[] arg) throws IOException {
@@ -129,7 +129,7 @@ public class ToCluto {
 
         //for(SparseDoc d : collectionOfSparseDoc) d.sortByDimensions();
 
-        File file = new File("rawVectors.clu");
+        File file = new File("rawCRVectors.clu");
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(file,false));
 

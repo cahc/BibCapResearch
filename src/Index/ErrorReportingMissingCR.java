@@ -9,12 +9,10 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Map;
 
-public class PlayGround {
+public class ErrorReportingMissingCR {
 
 
     public static void main(String[] arg) throws IOException {
-
-
 
 
         //
@@ -65,18 +63,21 @@ public class PlayGround {
         System.out.println("Now saving UT:s in .db that don't have any references according to .txt");
         int count = 0;
 
+        BufferedWriter writer = new BufferedWriter( new FileWriter( new File("missingCitedRefs.txt") ));
         for(String ut : uniqueUTsInMappy) {
 
 
             if(  !uniqueUT.contains(ut)  ) {
 
                 count++;
-
-
+                writer.write( ut );
+                writer.newLine();
             }
 
         }
 
+        writer.flush();
+        writer.close();
 
         System.out.println(count + " UTs dont have any cited refs..");
 
