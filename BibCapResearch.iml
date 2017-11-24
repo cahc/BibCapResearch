@@ -13,5 +13,6 @@
     <orderEntry type="library" name="it.unimi.dsi:fastutil:8.1.0" level="project" />
     <orderEntry type="library" name="algs4-1.0.0.0-sources" level="project" />
     <orderEntry type="library" name="com.google.guava:guava:23.3-jre" level="project" />
+    <orderEntry type="library" name="org.ejml:ejml-all:0.32" level="application" />
   </component>
 </module>
