@@ -182,9 +182,10 @@ public class MakeComparable {
 
         BufferedWriter writerNormalize = new BufferedWriter( new FileWriter( new File("normedCitDist.txt") ));
 
+        System.out.println("Total values in file1: " + totalDistFile1.size());
         for(Double val : totalDistFile1) {
 
-            double normedValue =  quantileFun.getQuantile( ecdf.getProb(val) );
+            double normedValue =  quantileFun.getQuantile( ecdf.getProbBinarySearch(val) );
             writerNormalize.write(val +" " +normedValue);
             writerNormalize.newLine();
 
