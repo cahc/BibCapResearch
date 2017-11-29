@@ -1,5 +1,7 @@
 package SimilarityValues;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -12,6 +14,148 @@ import java.util.OptionalDouble;
  * Created by crco0001 on 11/22/2017.
  */
 public class MakeComparable {
+
+    public static void preCalcForNormalizationProcedure(String clutoFileCitations , String clutoFileTerms) throws IOException {
+
+        BufferedReader citReader = new BufferedReader(new FileReader( new File( clutoFileCitations) ));
+        BufferedReader termReder = new BufferedReader(new FileReader( new File( clutoFileTerms) ) );
+
+        //check that dimensions match
+
+        String[] line1Parts = citReader.readLine().split(" ");
+        String[] line2Parts = termReder.readLine().split(" ");
+
+
+        if (!line1Parts[0].equals(line2Parts[0]) ) {System.out.println("missmatch dimensions.."); System.exit(0); }
+        if (!line1Parts[1].equals(line2Parts[1]) ) {System.out.println("missmatch dimensions.."); System.exit(0); }
+        if (!line1Parts[1].equals(line2Parts[0]) ) {System.out.println("missmatch dimensions.."); System.exit(0); }
+
+        System.out.println("N: " + line1Parts[0]);
+
+        DoubleList simValCit = new DoubleArrayList(1000);
+        DoubleList simValTerm = new DoubleArrayList(1000);
+
+
+        String line1;
+        String line2;
+        while( (line1 = citReader.readLine()) != null  && (line2 = termReder.readLine()) != null  )   {
+
+            line1Parts = line1.trim().split(" ");
+            line2Parts = line2.trim().split(" ");
+
+
+            for(int i=0; i< line1Parts.length-1; i++) {
+
+                simValCit.add(  (double)Double.valueOf(line1Parts[i+1] ) );
+                i++;
+            }
+
+
+            for(int i=0; i< line2Parts.length-1; i++) {
+
+
+                simValTerm.add( (double)Double.valueOf(line2Parts[i+1]) );
+                i++;
+            }
+
+
+        }
+
+        citReader.close();
+        termReder.close();
+        System.out.println("Now creating ecdf and Quantile objects");
+
+        QuantileFun quantileFuncTerm = new QuantileFun(simValTerm);
+
+        ECDF ecdfCit = new ECDF(simValCit);
+
+        System.out.println("Serializing..");
+
+
+        FileOutputStream fileOut = new FileOutputStream("ecdfCit.ser");
+        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        out.writeObject(ecdfCit);
+        out.close();
+        fileOut.close();
+
+        fileOut = new FileOutputStream("quantileFuncTerm.ser");
+        out = new ObjectOutputStream(fileOut);
+        out.writeObject(quantileFuncTerm);
+        out.close();
+        fileOut.close();
+
+
+    }
+
+    public static void normalizeSimilarityValuesWrtReferenseDistribution(String clutoFileCitations, String clutoFileTerms) throws FileNotFoundException {
+
+
+        ECDF ecdfCitations;
+
+        try {
+            FileInputStream fileIn = new FileInputStream("ecdfCit.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            ecdfCitations = (ECDF) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+            return;
+        } catch (ClassNotFoundException c) {
+            System.out.println("ECDF class not found");
+            c.printStackTrace();
+            return;
+        }
+
+
+        QuantileFun quantileFunTerms;
+
+
+        try {
+            FileInputStream fileIn = new FileInputStream("quantileFuncTerm.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            quantileFunTerms = (QuantileFun) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+            return;
+        } catch (ClassNotFoundException c) {
+            System.out.println("QuantileFun class not found");
+            c.printStackTrace();
+            return;
+        }
+
+
+        BufferedReader citReader = new BufferedReader(new FileReader( new File( clutoFileCitations) ));
+
+
+        //TODO finnish implementation
+
+
+    }
+
+    public static ECDF getCitEcdf() throws IOException, ClassNotFoundException {
+
+        FileInputStream fileIn = new FileInputStream("ecdfCit.ser");
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        ECDF e = (ECDF) in.readObject();
+        in.close();
+        fileIn.close();
+        return e;
+    }
+
+    public static QuantileFun getTermQuantFunc() throws IOException, ClassNotFoundException {
+
+        FileInputStream fileIn = new FileInputStream("quantileFuncTerm.ser");
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        QuantileFun e = (QuantileFun) in.readObject();
+        in.close();
+        fileIn.close();
+        return e;
+
+
+    }
 
     static class NodeWithSimValue implements Comparable<NodeWithSimValue>{
 
@@ -51,6 +195,15 @@ public class MakeComparable {
     }
 
 
+
+    public static void main(String[] arg) throws IOException {
+
+        preCalcForNormalizationProcedure("simk50cit.clu","simk50term.clu");
+
+    }
+
+
+    /*
     public static void main(String[] arg) throws IOException {
 
         if (arg.length != 2) {
@@ -216,5 +369,8 @@ public class MakeComparable {
         reader2.close();
 
     }
+
+*/
+
 
 }
