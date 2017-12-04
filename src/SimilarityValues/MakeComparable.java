@@ -87,7 +87,7 @@ public class MakeComparable {
 
     }
 
-    public static void normalizeSimilarityValuesWrtReferenseDistribution(String clutoFileCitations, String clutoFileTerms) throws FileNotFoundException {
+    public static void normalizeSimilarityValuesWrtReferenseDistribution(String clutoFileCitations, String clutoFileTerms) throws IOException {
 
 
         ECDF ecdfCitations;
@@ -128,10 +128,40 @@ public class MakeComparable {
 
 
         BufferedReader citReader = new BufferedReader(new FileReader( new File( clutoFileCitations) ));
+        BufferedWriter citWriter = new BufferedWriter( new FileWriter( new File(clutoFileCitations+"-QRNORMED.txt") ) );
+
+        String line;
+
+        citWriter.write( citReader.readLine()  ); // Dimension info
+        citWriter.newLine();
+
+        while(   (line = citReader.readLine()) != null   ) {
+
+                String[] line1Parts = line.trim().split(" ");
 
 
-        //TODO finnish implementation
+                for(int i=0; i< line1Parts.length-1; i++) {
 
+
+
+                       double prob = ecdfCitations.getProbBinarySearch( (double)Double.valueOf(line1Parts[i+1] ));
+                       double val = quantileFunTerms.getQuantile( prob );
+                       citWriter.write(line1Parts[i] + " " + val);
+
+                       if(i < line1Parts.length-2) citWriter.write(" ");
+
+                    i++;
+
+                }
+
+                citWriter.newLine();
+
+            }
+
+
+            citReader.close();
+            citWriter.flush();
+            citWriter.flush();
 
     }
 
@@ -198,7 +228,11 @@ public class MakeComparable {
 
     public static void main(String[] arg) throws IOException {
 
+        System.out.println("PreCalc");
         preCalcForNormalizationProcedure("simk50cit.clu","simk50term.clu");
+
+        System.out.println("Normalising");
+        normalizeSimilarityValuesWrtReferenseDistribution("simk50cit.clu","simk50term.clu");
 
     }
 
