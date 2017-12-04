@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="com.edwardraff:JSAT:0.0.9" type="repository">
+    <properties maven-id="com.edwardraff:JSAT:0.0.9" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/JSAT-0.0.9.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/JSAT-0.0.9-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/JSAT-0.0.9-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
