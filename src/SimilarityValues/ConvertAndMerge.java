@@ -149,6 +149,8 @@ public class ConvertAndMerge {
 
         if(A.rows() != A.cols()) {System.out.println("Only square matrices supported"); System.exit(0); }
 
+        System.out.println("### " + A.rows());
+
         BufferedWriter writer = new BufferedWriter( new FileWriter( new File(fileName)));
 
         int rows = A.rows();
@@ -181,9 +183,21 @@ public class ConvertAndMerge {
 
             System.out.println("n*n write not supported yet"); System.exit(0);
             writer.close();
+
+
         }
 
 
+        Iterator<IndexValue> iterator = A.getRowView(955490).getNonZeroIterator();
+
+        int count = 0;
+        while (iterator.hasNext()) {
+
+            iterator.next();
+            count++;
+
+
+        }
 
     }
 
@@ -236,6 +250,9 @@ public class ConvertAndMerge {
         saveSparseMatrixToClutoFile(sparseMatrix3,"combinedSimilarityValuesSymmetriced.clu");
 
         saveToLinkedList(sparseMatrix3,true,"combinedLinkedList.txt");
+
+
+
 
 
     }
