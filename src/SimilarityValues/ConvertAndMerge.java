@@ -199,6 +199,9 @@ public class ConvertAndMerge {
 
         }
 
+
+        System.out.println("Count: " + count);
+
     }
 
 
