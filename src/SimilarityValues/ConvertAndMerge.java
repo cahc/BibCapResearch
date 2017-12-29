@@ -5,6 +5,7 @@ import jsat.classifiers.linear.SPA;
 import jsat.linear.IndexValue;
 import jsat.linear.SparseMatrix;
 import jsat.linear.SparseVector;
+import jsat.linear.Vec;
 
 import java.io.*;
 import java.text.NumberFormat;
@@ -136,10 +137,72 @@ public class ConvertAndMerge {
 
         if(A.rows() != A.cols()) {System.out.println("Only square matrices supported"); System.exit(0); }
 
+        SparseMatrix C = new SparseMatrix(A.rows(),A.cols(),(int)(A.nnz() / ((double)A.rows())) );
+        A.transpose(C);
 
+        A.mutableAdd(1,C);
 
     }
 
+
+    public static void saveToLinkedList(SparseMatrix A,boolean onlyUpperTriangle, String fileName) throws IOException {
+
+        if(A.rows() != A.cols()) {System.out.println("Only square matrices supported"); System.exit(0); }
+
+        System.out.println("### " + A.rows());
+
+        BufferedWriter writer = new BufferedWriter( new FileWriter( new File(fileName)));
+
+        int rows = A.rows();
+
+        if(onlyUpperTriangle) {
+
+
+            for(int i=0; i<rows; i++) {
+
+
+                Vec row = A.getRowView(i);
+
+                Iterator<IndexValue> iter = row.getNonZeroIterator();
+                while(iter.hasNext()) {
+
+                    IndexValue indexValue = iter.next();
+
+                    if( indexValue.getIndex() > i ) { writer.write(i +" " + indexValue.getIndex() + " " +indexValue.getValue()); writer.newLine(); }
+
+                }
+
+            }
+
+            writer.flush();
+            writer.close();
+
+
+        } else {
+
+
+            System.out.println("n*n write not supported yet"); System.exit(0);
+            writer.close();
+
+
+        }
+
+
+        Iterator<IndexValue> iterator = A.getRowView(955490).getNonZeroIterator();
+
+        int count = 0;
+        while (iterator.hasNext()) {
+
+            iterator.next();
+            count++;
+
+
+        }
+
+
+        System.out.println("Count: " + count);
+
+    }
 
 
     public static void main(String[] arg) throws IOException {
@@ -178,6 +241,21 @@ public class ConvertAndMerge {
         System.out.println("Writing to file..");
 
         saveSparseMatrixToClutoFile(sparseMatrix3,"combinedSimilarityValues.clu");
+
+        System.out.println("Symmetrising...");
+        makeSymetric(sparseMatrix3);
+
+        System.out.println("info from combined matrix 4");
+        System.out.println("rows:" +sparseMatrix3.rows() );
+        System.out.println("col:" +sparseMatrix3.cols() );
+        System.out.println("nnz:" +sparseMatrix3.nnz() );
+
+        saveSparseMatrixToClutoFile(sparseMatrix3,"combinedSimilarityValuesSymmetriced.clu");
+
+        saveToLinkedList(sparseMatrix3,true,"combinedLinkedList.txt");
+
+
+
 
 
     }
