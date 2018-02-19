@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,6 +35,9 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     int citationsIncSelf;
     int citationsExclSelf;
 
+
+    List<String> subjectCategories;
+
     public BibCapRecord() {}
 
 
@@ -41,9 +45,29 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms +"\t" + subjectCategories;
 
     }
+
+    public List<String> getSubjectCategories() {
+        return subjectCategories;
+    }
+
+    public void addSubjectCategories(String rawSubjectCategoriesString) {
+
+        String[] subcats = rawSubjectCategoriesString.split(";");
+        this.subjectCategories = new ArrayList<>(2);
+
+            for(String s: subcats) {
+
+                String subcat = s.trim().toLowerCase();
+                this.subjectCategories.add(subcat);
+
+            }
+
+        }
+
+
 
     public void addExtractedTerm(String term) {
 

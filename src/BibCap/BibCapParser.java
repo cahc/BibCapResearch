@@ -15,12 +15,29 @@ import java.util.regex.Pattern;
 public class BibCapParser {
 
 
+    /*
+
+    Datakälla: Bibmet version 2017 Q3.
+
+•	I filen publ.txt finns 955661 publikationer från WoS representerade (två publikationer från studien av relationen mellan egenskaper hos citerade referenser och fältnormerad citeringsgrad kunde inte hittas i Bibmet). 1 publikation per rad med Doc_id, UT, Title, Full_source_title, C_sciwo och C_scxwo som kolumner. PY=2009. Endast publikationer av dokumenttypen ’Article’ registrerade i tidskriftsindexen i WoS samt publicerade i CWTS core journals (gällande CWTS Leiden Ranking 2015). Varje publikation har en titel och minst en citerad referens.
+
+•	I filen abstract.txt, vilken gäller artiklarna i filen publ.txt, finns Doc_id och Text (abstract) som kolumner. Observera att ett abstract i Bibmets tabell 'Abstract' kan vara uppdelat på flera rader. I vissa fall gäller att ett Doc_id i filen kan förekomma på två eller flera konsekutiva rader i kolumnen Doc_id, och kolumnen Text har i dessa rader delarna av Doc_id:s abstract. Även artiklar utan abstract representeras i filen. Dessa har strängen NO_ABSTRACT kolumnen Text. 17896 publikationer saknar abstract.
+
+•	cited_refs.txt innehåller citerade referenser för artiklarna i filen publ.txt, där även referenser, vilka inte gäller publikationer registrerade i WoS, finns med.
+
+•	Filen WCs.txt rapporterar WoS Subject Categories för publikationerna representerade i filen publ.txt. En rad per publikation. 15 publikationer saknar kategori. Dessa är uppmärkta med 'NO-CATEGORY-NAME' i kolumnen 'WCs'.
+
+
+
+     */
+
+
 
     File publ;
     File citedRefs;
     File abstracts;
 
-    File citationData;
+    File subjectCategories;
 
 
     //for the persistence stores..
@@ -30,26 +47,33 @@ public class BibCapParser {
     static final Pattern TAB = Pattern.compile("\t");
     final static Pattern ARKIVX = Pattern.compile(".*?ARXIV.*[0,9]+.*");
 
+
+
+
+
+
+
+
     public BibCapParser(String publFile, String citedRefsFile, String abstractsFile, String citationDataFile) throws IOException {
 
-        //Doc_id	UT	Title	Source	TC
+        //Doc_id	UT	Title	Source	TC(inc self cit) TC(exl self cit)
 
         this.publ = new File(publFile);
 
-        //Doc_id	UT	Title	Source	TC	Cited_author	Cited_ref_year	Cited_work	Cited_volume	Cited_page	Document_year
+        //Doc_id	UT	Title	Full_source_title	C_sciwo	C_scxwo	Cited_author	Cited_ref_year	Cited_work	Cited_volume	Cited_page	Document_year
         this.citedRefs = new File(citedRefsFile);
 
         //Doc_id	Text
         this.abstracts = new File(abstractsFile);
 
-        //UT C_sciwo (citations inc self) ... C_scxwo (citations exl. self)
-        this.citationData = new File(citationDataFile);
+        //UT	WCs
+        this.subjectCategories = new File(citationDataFile);
 
 
         if(!this.publ.exists()) throw new IOException("publFile missing..");
-        if(!this.citedRefs.exists()) throw new IOException("publFile missing..");
-        if(!this.abstracts.exists()) throw new IOException("publFile missing..");
-        if(!this.citationData.exists()) throw new IOException("publFile missing..");
+        if(!this.citedRefs.exists()) throw new IOException("citedRefs missing..");
+        if(!this.abstracts.exists()) throw new IOException("abstracts missing..");
+        if(!this.subjectCategories.exists()) throw new IOException("subCats missing..");
 
 
     }
@@ -65,7 +89,7 @@ public class BibCapParser {
     public BibCapParser() throws IOException {
 
 
-        this("publ.txt","cited_refs_new.txt","abstracts.txt","wos_cwts_kth_cit-data_V2.txt");
+        this("DATA\\publ.txt","DATA\\cited_refs.txt","DATA\\abstracts.txt","DATA\\WCs.txt");
 
     }
 
@@ -81,7 +105,7 @@ public class BibCapParser {
 
 
 
-        System.out.println("Getting doc_id, UT, title and source in pass one..");
+        System.out.println("Getting doc_id, UT, title and source and citations in pass one..");
         System.out.println("Running custom RAKE keyword extraction algorithm on title");
         BufferedReader reader = new BufferedReader(new FileReader(this.publ));
 
@@ -100,13 +124,19 @@ public class BibCapParser {
             String UT = splitted[1];
             String title = splitted[2];
             String source = splitted[3];
-            //ignoring TC
+
+            int TC_with_self_cit = Integer.valueOf(splitted[4]);
+            int TC_without_seld_cit = Integer.valueOf(splitted[5]);
+
+
 
             BibCapRecord biBCapRecord = new BibCapRecord();
             biBCapRecord.setInternalId(doc_id);
             biBCapRecord.setUT(UT);
             biBCapRecord.setTitle(title);
             biBCapRecord.setSource(source);
+            biBCapRecord.setCitationsExclSelf( TC_without_seld_cit );
+            biBCapRecord.setCitationsIncSelf( TC_with_self_cit );
 
 
             if(title != null) {
@@ -147,7 +177,7 @@ public class BibCapParser {
         firstline = true;
         HashSet<Integer> countRecordsWitAbstract = new HashSet<>();
 
-        int idOfCurrentFetechedDoc = -99;
+        int idOfCurrentFetchedDoc = -99;
         BibCapRecord bibCapRecord = null;
 
         while ((line = reader.readLine()) != null) {
@@ -160,35 +190,35 @@ public class BibCapParser {
             String[] splitted = TAB.split(line);
 
             Integer id = Integer.valueOf(splitted[0]);
-            countRecordsWitAbstract.add(id);
             String text = splitted[1];
+            if( "NO_ABSTRACT".equals( text) ) continue;
 
-            if(idOfCurrentFetechedDoc == id) {
+            countRecordsWitAbstract.add(id);
+
+
+            if(idOfCurrentFetchedDoc == id) {
 
                 bibCapRecord.addPartOfAbstract(text);
-
 
 
             } else {
 
                 //for persitance store, overwrite
-                if(idOfCurrentFetechedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetechedDoc, bibCapRecord);
+                if(idOfCurrentFetchedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetchedDoc, bibCapRecord);
 
                 bibCapRecord = bibCapRecordStore.getRecord(id);
                 bibCapRecord.addPartOfAbstract(text);
-                idOfCurrentFetechedDoc = id;
+                idOfCurrentFetchedDoc = id;
             }
 
 
         }
 
         //last uppdated record may not have been writen to disk
-        bibCapRecordStore.putRecord(idOfCurrentFetechedDoc,bibCapRecord);
+        bibCapRecordStore.putRecord(idOfCurrentFetchedDoc,bibCapRecord);
 
 
         reader.close();
-
-
 
         System.out.println("Running RAKE on abstracts..");
         for (Integer key : orderedKeySet) {
@@ -243,7 +273,7 @@ public class BibCapParser {
 
         int badRefCount = 0;
 
-        idOfCurrentFetechedDoc = -99;
+        idOfCurrentFetchedDoc = -99;
         bibCapRecord = null;
 
 
@@ -258,11 +288,11 @@ public class BibCapParser {
             Integer id = Integer.valueOf(splitted[0]);
 
 
-            String cited_author = splitted[5].toUpperCase(); //sometimes the strings are mixed
-            String cited_year = splitted[6];
-            String cited_work = splitted[7].toUpperCase(); //sometimes the strings are mixed
-            String cited_volume = splitted[8];
-            String cited_page = splitted[9];
+            String cited_author = splitted[6].toUpperCase(); //sometimes the strings are mixed
+            String cited_year = splitted[7];
+            String cited_work = splitted[8].toUpperCase(); //sometimes the strings are mixed
+            String cited_volume = splitted[9];
+            String cited_page = splitted[10];
 
             StringBuilder citedString = new StringBuilder();
 
@@ -299,7 +329,7 @@ public class BibCapParser {
 
                 if(m.find()) {
 
-                    if(idOfCurrentFetechedDoc == id) {
+                    if(idOfCurrentFetchedDoc == id) {
 
 
                         String okRef =  m.group(0).trim();
@@ -315,7 +345,7 @@ public class BibCapParser {
                     } else {
 
 
-                        if(idOfCurrentFetechedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetechedDoc, bibCapRecord);
+                        if(idOfCurrentFetchedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetchedDoc, bibCapRecord);
 
                         //now new
                         bibCapRecord = bibCapRecordStore.getRecord(id);
@@ -326,7 +356,7 @@ public class BibCapParser {
 
                         bibCapRecord.addCitedReference( bibCapCitedReferenceWithSearchKey  );
                         countRecordsWitRef.add(id);
-                        idOfCurrentFetechedDoc = id;
+                        idOfCurrentFetchedDoc = id;
                         goodReferenceWriter.write(okRef);
                         goodReferenceWriter.newLine();
 
@@ -341,7 +371,7 @@ public class BibCapParser {
 
             } else {
 
-                if(idOfCurrentFetechedDoc == id) {
+                if(idOfCurrentFetchedDoc == id) {
                     String okRef = citedString.toString();
 
                     BibCapCitedReferenceWithSearchKey bibCapCitedReferenceWithSearchKey = new BibCapCitedReferenceWithSearchKey(okRef, cited_author,cited_year,cited_work);
@@ -354,7 +384,7 @@ public class BibCapParser {
 
                 } else {
 
-                    if(idOfCurrentFetechedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetechedDoc, bibCapRecord);
+                    if(idOfCurrentFetchedDoc != -99) bibCapRecordStore.putRecord(idOfCurrentFetchedDoc, bibCapRecord);
 
 
                     bibCapRecord = bibCapRecordStore.getRecord(id);
@@ -366,7 +396,7 @@ public class BibCapParser {
 
                     bibCapRecord.addCitedReference( bibCapCitedReferenceWithSearchKey );
                     countRecordsWitRef.add(id);
-                    idOfCurrentFetechedDoc = id;
+                    idOfCurrentFetchedDoc = id;
 
 
                 }
@@ -377,7 +407,7 @@ public class BibCapParser {
         }
 
         //last uppdated record may not have been writen to disk
-        bibCapRecordStore.putRecord(idOfCurrentFetechedDoc,bibCapRecord);
+        bibCapRecordStore.putRecord(idOfCurrentFetchedDoc,bibCapRecord);
 
 
 
@@ -387,11 +417,14 @@ public class BibCapParser {
         badReferencesWriter.flush();
         badReferencesWriter.close();
 
-        System.out.println("Getting citation count including/exkluding self cit in pass 4. Also mark if it is a considered article (core journal an at least 1 cited ref) ");
 
-        reader = new BufferedReader(new FileReader(this.citationData));
 
-        Map<String,CitationInformation>  UTtoCitationInformation = new HashMap<>();
+        System.out.println("Getting Subject categories in pass 4");
+
+        reader = new BufferedReader(new FileReader(this.subjectCategories));
+
+        //UT	WCs
+        Map<String,String>  UTtoWCs = new HashMap<>();
 
 
         firstline = true;
@@ -404,22 +437,18 @@ public class BibCapParser {
 
             String[] splitted = TAB.split(line);
             String UT = splitted[0];
-            CitationInformation cit = new CitationInformation();
-            cit.citIncludingSelf = Integer.valueOf( splitted[1] );
-            cit.citExcludingSelf = Integer.valueOf (splitted[3]  );
+            String WCs = splitted[1];
 
-            UTtoCitationInformation.put(UT, cit);
+
+            UTtoWCs.put(UT, WCs);
 
 
         }
 
         reader.close();
 
-        System.out.println(UTtoCitationInformation.size() + " UT:s with citation information read, now matching..");
+        System.out.println(UTtoWCs.size() + " UT:s with WC:s (inc 'NO-CATEGORY-NAME' read, now matching..");
         HashSet<Integer> countConsideredArticles = new HashSet<>();
-
-
-
 
 
 
@@ -428,30 +457,22 @@ public class BibCapParser {
             bibCapRecord = bibCapRecordStore.getRecord(key);
             String UT = bibCapRecord.getUT();
 
-            CitationInformation citationInformation = UTtoCitationInformation.get(UT);
+            String WCs = UTtoWCs.get(UT);
 
-            if(citationInformation == null) {
+            if("NO-CATEGORY-NAME".equals(WCs)) {
 
+                System.out.println("missing category, calling .setConsideredRecord(false)!");
                 bibCapRecord.setConsideredRecord(false);
 
-
-                //not supported by mvstore
-                //entry.setValue(bibCapRecord);
-
-                //not allowed?
                 bibCapRecordStore.putRecord(key,bibCapRecord );
 
             } else {
 
 
-                bibCapRecord.setCitationsIncSelf( citationInformation.citIncludingSelf );
-                bibCapRecord.setCitationsExclSelf( citationInformation.citExcludingSelf);
+                bibCapRecord.addSubjectCategories( WCs );
+
                 bibCapRecord.setConsideredRecord(true);
-                //entry.setValue(bibCapRecord);
-
-                //not allowed?
                 bibCapRecordStore.putRecord(key, bibCapRecord);
-
                 countConsideredArticles.add( bibCapRecord.internalId );
 
 
@@ -462,41 +483,15 @@ public class BibCapParser {
 
 
 
-
-
         System.out.println(countConsideredArticles.size() +" records matched = final data set ");
 
         System.out.println("total size: " + bibCapRecordStore.size());
 
 
-        //System.out.println("Writing the whole (considered records) database to a text file..");
-        // BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter( new File("ParsedBibCapRecords.txt")));
-
-        // for(Map.Entry<Integer, BibCapRecord> entry : recordHashMap.entrySet()) {
-
-        //     BibCapRecord record = entry.getValue();
-        //     if(!record.isConsideredRecord()) continue;
-
-        //     bufferedWriter.write( entry.getValue().toString() );
-        //     bufferedWriter.newLine();
-
-
-        //  }
-
-
-        // bufferedWriter.flush();
-        // bufferedWriter.close();
+        System.out.println("Consider running java -cp *.jar Persistor.runCompactOnMVStore");
 
 
 
     }
 
-
-    private class CitationInformation {
-
-        int citIncludingSelf;
-        int citExcludingSelf;
-
-
-    }
 }
