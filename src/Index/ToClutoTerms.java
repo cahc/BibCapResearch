@@ -76,12 +76,21 @@ public class ToClutoTerms {
         MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer, BibCapRecord>().keyType(new ObjectDataType()).valueType(new BibCapRecord()));
 
 
+        BufferedWriter writeUTtoSeqID = new BufferedWriter( new FileWriter( new File("UTtoIDText.txt")));
+        int id = 1;
         int maxDim = -99;
         for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
+
 
             BibCapRecord bibCapRecord = entry.getValue();
 
             Int2FloatOpenHashMap dimToOccurences = new Int2FloatOpenHashMap(); //TODO why float here?
+
+            writeUTtoSeqID.write(bibCapRecord.getUT() +"\t" + id);
+            writeUTtoSeqID.newLine();
+            id++;
+
+
 
             for(String term : bibCapRecord.getExtractedTerms()) {
 
@@ -108,6 +117,8 @@ public class ToClutoTerms {
 
         }
 
+        writeUTtoSeqID.flush();
+        writeUTtoSeqID.close();
 
 
         System.out.println("Max dim (one indexed) is: " +  maxDim );
@@ -123,6 +134,15 @@ public class ToClutoTerms {
         System.out.println("Documents/rows: " + nrows);
         System.out.println("Features/column: " + ncols);
         System.out.println("nnz (#non zero values): " +nnz);
+
+
+        System.out.println("IDF weighting..");
+
+        for(SparseDoc d : collectionOfSparseDoc) d.idfWeight(featureToGlobalFrequency,collectionOfSparseDoc.size());
+
+        System.out.println("Normalizing");
+        for(SparseDoc d : collectionOfSparseDoc) d.normalize();
+
 
         //System.out.println("Sorting by dimension");
 

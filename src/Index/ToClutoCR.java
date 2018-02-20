@@ -79,6 +79,8 @@ public class ToClutoCR {
 
 
         int maxDim = -99;
+        BufferedWriter writeUTtoSeqID = new BufferedWriter( new FileWriter( new File("UTtoIDRefs.txt")));
+        int id =1;
         for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
            Int2FloatOpenHashMap dimToOccurences = new Int2FloatOpenHashMap(); //TODO why float here?
@@ -86,6 +88,9 @@ public class ToClutoCR {
             BibCapRecord bibCapRecord = entry.getValue();
             List<BibCapCitedReferenceWithSearchKey> references = bibCapRecord.getCitedReferences();
 
+            writeUTtoSeqID.write(bibCapRecord.getUT() +"\t" + id);
+            writeUTtoSeqID.newLine();
+            id++;
 
             for(BibCapCitedReferenceWithSearchKey ref : references) {
 
@@ -112,6 +117,8 @@ public class ToClutoCR {
 
         System.out.println("Max dim (one indexed) is: " +  maxDim );
 
+        writeUTtoSeqID.flush();
+        writeUTtoSeqID.close();
 
         int nrows = collectionOfSparseDoc.size();
         int ncols = featureToGlobalFrequency.size();
@@ -123,6 +130,16 @@ public class ToClutoCR {
         System.out.println("Documents/rows: " + nrows);
         System.out.println("Features/column: " + ncols);
         System.out.println("nnz (#non zero values): " +nnz);
+
+
+
+        System.out.println("IDF weighting..");
+
+        for(SparseDoc d : collectionOfSparseDoc) d.idfWeight(featureToGlobalFrequency,collectionOfSparseDoc.size());
+
+        System.out.println("Normalizing");
+        for(SparseDoc d : collectionOfSparseDoc) d.normalize();
+
 
         //System.out.println("Sorting by dimension");
 
