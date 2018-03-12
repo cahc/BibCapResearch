@@ -89,7 +89,7 @@ public class BibCapParser {
     public BibCapParser() throws IOException {
 
 
-        this("DATA\\publ.txt","DATA\\cited_refs.txt","DATA\\abstracts.txt","DATA\\WCs.txt");
+        this("DATA//publ.txt","DATA//cited_refs.txt","DATA//abstracts.txt","DATA//WCs.txt");
 
     }
 
