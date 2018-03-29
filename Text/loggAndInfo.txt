@@ -1,0 +1,80 @@
+1. Parse raw text files
+
+java -Xmx18G -cp BibCapResearch.jar BibCap.PlayGroundBibCapWriter
+
+start parsing
+Loading Rake..
+Getting doc_id, UT, title and source and citations in pass one..
+Running custom RAKE keyword extraction algorithm on title
+**********Records created in pass 1: 955661************************
+Getting abstracts in pass two..
+Running RAKE on abstracts..
+*****************Abstracts added to 937765 records in pass two*********** #937765 + 17896 = 955661
+Getting cited references in pass 3..
+Creating 4 indexing keys per cited reference..
+***************References added to 955661 records in pass 3*************************
+
+202916 reference ignored: noise, in press etc. See badReferences.txt
+Getting Subject categories in pass 4
+*************955661 UT:s with WC:s (inc 'NO-CATEGORY-NAME' read, now matching..************
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+************955646 records matched = final data set********************* #955646 + 15 = 955661
+total size: 955661
+Consider running java -cp BibCapResearch.jar Persistor.runCompactOnMVStore
+Done. That took: 2654.864. Now writing to file
+# mappings:  955661
+new # mappings:  955646
+
+
+2. compacting DB
+
+java -cp BibCapResearch.jar Persistor.runCompactOnMVStore mappy.db
+
+3. Create groups referenses based on similaiity and map to indices
+
+java -Xmx18G -cp BibCapResearch.jar Index.WriteCitedReferencesToIndices mappy.db 0.925
+
+4. Map terms to indices
+
+java -Xmx18G -cp BibCapResearch.jar Index.WriteTermsToIndices mappy.db
+
+
+5. Create vectors (terms) ONE-INDEXED!!
+
+java -Xmx10G -cp BibCapResearch.jar Index.ToClutoTerms mappy.db termsToIntegers.txt
+
+Max dim (one indexed) is: 9050424
+Documents/rows: 955646
+Features/column: 9050424
+nnz (#non zero values): 45923730
+IDF weighting..
+Normalizing
+
+
+6. Create vectors (cited refs)
+
+java -Xmx10G -cp BibCapResearch.jar Index.ToClutoCR mappy.db referencesToIntegersThreshold0.925.txt
+
+Max dim (one indexed) is: 12317063
+Documents/rows: 955646
+Features/column: 12317063
+nnz (#non zero values): 31313038
+
+7. Now switch no linux and run knng --> see scripts runner*.sh
+
+9. create SC-baselie
+
