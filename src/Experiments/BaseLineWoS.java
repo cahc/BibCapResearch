@@ -21,7 +21,6 @@ public class BaseLineWoS {
 
     public static void main(String[] arg) {
 
-
         if(arg.length != 1) { System.out.println("Supply db"); System.exit(0); }
 
         MVStore store = new MVStore.Builder().cacheSize(200). // 200MB read cache
