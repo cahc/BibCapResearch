@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -44,11 +46,20 @@ public class PlayGroundBibCapWriter {
 
         //orderedSet
 
+        List<String> problematicUTs = new ArrayList<>(); // se Wos_refvalues_debugging.xlsx
+        problematicUTs.add("000267281800014");
+        problematicUTs.add("000265827300008");
+        problematicUTs.add("000272998000008");
+        problematicUTs.add("000270754400012");
+
+
         for (Integer key : bibCapParser.getKeySet() ) {
 
             BibCapRecord record = recordStore.getRecord(key);
 
             if(!record.isConsideredRecord()) {recordStore.remove(key) ; continue; }
+
+            if(problematicUTs.contains( record.getUT() )) { recordStore.remove(key); System.out.println("1 of the 4 problmatic records removed"); continue;  }
 
             writer.write(record.toString());
             writer.newLine();
