@@ -32,6 +32,8 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     List<BibCapCitedReferenceWithSearchKey> bibCapCitedReference = new ArrayList<>();
     List<String> extractedTerms = new ArrayList<>();
 
+    List<String> simpleBagOfWordTerms = new ArrayList<>(); //TODO FIX THIS
+
     int citationsIncSelf;
     int citationsExclSelf;
 

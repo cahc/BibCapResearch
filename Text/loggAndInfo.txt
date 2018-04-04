@@ -78,3 +78,5 @@ nnz (#non zero values): 31313038
 
 9. create SC-baselie
 
+java -cp BibCapResearch.jar Experiments.BaseLineWoS mappy.db
+

@@ -38,7 +38,7 @@ public class PlayGroundBibCapWriter {
        recordStore.saveChanges();
        //recordStore.compact(); //todo check: memory explodes here!
 
-        BufferedWriter writer = new BufferedWriter( new FileWriter( new File("rawOutput.txt") ));
+    //    BufferedWriter writer = new BufferedWriter( new FileWriter( new File("rawOutput.txt") ));
 
         System.out.println("# mappings:  " + recordStore.size());
 
@@ -61,13 +61,13 @@ public class PlayGroundBibCapWriter {
 
             if(problematicUTs.contains( record.getUT() )) { recordStore.remove(key); System.out.println("1 of the 4 problmatic records removed"); continue;  }
 
-            writer.write(record.toString());
-            writer.newLine();
+           // writer.write(record.toString());
+          //  writer.newLine();
 
         }
 
-        writer.flush();
-        writer.close();
+        //writer.flush();
+       // writer.close();
 
         System.out.println("new # mappings:  " + recordStore.size());
        recordStore.close();

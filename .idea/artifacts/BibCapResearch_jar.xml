@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="BibCapResearch:jar">
-    <output-path>$PROJECT_DIR$/../NEW_DATA_BIBCAP_2017</output-path>
+    <output-path>F:/NEW_DATA_BIBCAP_2017</output-path>
     <root id="archive" name="BibCapResearch.jar">
       <element id="module-output" name="BibCapResearch" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/fst-2.54.jar" path-in-jar="/" />
