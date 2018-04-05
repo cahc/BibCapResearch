@@ -264,7 +264,7 @@ public class RAKE {
         }
     }
 
-    public List<String> getKeyWords(String input, boolean cleanAbstractFromCopyright, Set<String> stopword, UEALite stemmer) {
+    public List<List<String>> getKeyWords(String input, boolean cleanAbstractFromCopyright, Set<String> stopword, UEALite stemmer) {
 
         if(cleanAbstractFromCopyright) {
 
@@ -300,12 +300,24 @@ public class RAKE {
 
         }
 
+
         //indicate if a stopword from list, a POS-tag not considered or not a minimum a 3-char a-z String, start of withd
         boolean[] skipToken = new boolean[tokens.size()];
+
+        List<String> simpleTokens = new ArrayList<>();
 
         for(int i=0; i < skipToken.length; i++) {
 
             boolean ignoreThisToken = stopword.contains( tokens.get(i) );
+
+            //save simple tokens here, perhaps the rake thing is over-complicated for no benefit?
+            if(!ignoreThisToken) {
+
+                if( isConsideredWord( tokens.get(i)) ) simpleTokens.add(tokens.get(i));
+
+            }
+
+            //save a simple list of tokens here
 
             if(ignoreThisToken) {
 
@@ -318,9 +330,11 @@ public class RAKE {
             } else if(  RAKE.POStagsToIgnore.contains(  finaltags.get(i)  )) {
 
                 skipToken[i] = true;
+
             } else if( !isConsideredWord(tokens.get(i))  ) {
 
                 skipToken[i] = true;
+
             }
 
 
@@ -331,12 +345,14 @@ public class RAKE {
 
         List<String> keywords = new ArrayList<>();
 
+
         for(int i=0; i<skipToken.length; i++) {
 
 
             if(skipToken[i]) {
 
                 continue;
+
             } else {
 
                 StringBuilder term = new StringBuilder();
@@ -367,8 +383,11 @@ public class RAKE {
 
 
    //for (int i=0; i< tokens.size(); i++ ) System.out.println( tokens.get(i) + " " + skipToken[i] + " " + finaltags.get(i));
+    List<List<String>> rakeListAndSimpleTokenList = new ArrayList<>();
+    rakeListAndSimpleTokenList.add(keywords);
+    rakeListAndSimpleTokenList.add(simpleTokens);
 
-    return keywords;
+    return rakeListAndSimpleTokenList;
 
     }
 
@@ -487,11 +506,11 @@ public class RAKE {
 
         Set<String> stopwords = rake.loadStopWordList(true);
 
-        List<String> extractedKeywords =  rake.getKeyWords(test, false,stopwords,stemmer);
+        List<List<String>> extractedKeywords =  rake.getKeyWords(test, false,stopwords,stemmer);
 
 
-       System.out.println(extractedKeywords);
-
+       System.out.println(extractedKeywords.get(0));
+        System.out.println(extractedKeywords.get(1));
 
        System.out.println("Testing n-grams:");
 

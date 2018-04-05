@@ -1,48 +1,67 @@
 1. Parse raw text files
 
-java -Xmx18G -cp BibCapResearch.jar BibCap.PlayGroundBibCapWriter
 
+java -Xmx18G -cp BibCapResearch.jar BibCap.PlayGroundBibCapWriter
 start parsing
 Loading Rake..
 Getting doc_id, UT, title and source and citations in pass one..
 Running custom RAKE keyword extraction algorithm on title
-**********Records created in pass 1: 955661************************
+Records created in pass 1: 955661
+
 Getting abstracts in pass two..
-Running RAKE on abstracts..
-*****************Abstracts added to 937765 records in pass two*********** #937765 + 17896 = 955661
+Running RAKE on abstracts.. Also saving simple Bag-of-Words..
+Abstracts added to 937765 records in pass two
+
 Getting cited references in pass 3..
 Creating 4 indexing keys per cited reference..
-***************References added to 955661 records in pass 3*************************
 
+References added to 955661 records in pass 3
 202916 reference ignored: noise, in press etc. See badReferences.txt
 Getting Subject categories in pass 4
-*************955661 UT:s with WC:s (inc 'NO-CATEGORY-NAME' read, now matching..************
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-missing category, calling .setConsideredRecord(false)!
-************955646 records matched = final data set********************* #955646 + 15 = 955661
-total size: 955661
-Consider running java -cp BibCapResearch.jar Persistor.runCompactOnMVStore
-Done. That took: 2654.864. Now writing to file
-# mappings:  955661
-new # mappings:  955646
 
+955661 UT:s with WC:s (inc 'NO-CATEGORY-NAME' read, now matching..
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+missing category, calling .setConsideredRecord(false)!
+955646 records matched = final data set (no..)
+total size: 955661
+Consider running java -cp *.jar Persistor.runCompactOnMVStore
+Done. That took: 2589.292. Now writing to file
+# mappings:  955661
+1 of the 4 problmatic records removed
+1 of the 4 problmatic records removed
+1 of the 4 problmatic records removed
+1 of the 4 problmatic records removed
+new # mappings:  955642  ( +4 =955646 = 955646)
+
+****************FINAL SET: 955642******************
 
 2. compacting DB
 
 java -cp BibCapResearch.jar Persistor.runCompactOnMVStore mappy.db
+
+2.1 dumping to text
+
+java -cp BibCapResearch.jar BibCap.BibCapRecordsDumpToText mappy.db
+
+####potential check high freq simple tokens for adding to custom stopwordlist###
+
+java -cp BibCapResearch.jar NLP.PlaygroundCustomStopWords mappy.db
+
+#
+
 
 3. Create groups referenses based on similaiity and map to indices
 

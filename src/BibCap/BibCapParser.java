@@ -140,7 +140,11 @@ public class BibCapParser {
 
 
             if(title != null) {
-                List<String> keywordsFromTitle =  rake.getKeyWords(title,false,stopwords,stemmer);
+                List<List<String>> rakeKeyWordsAndSimpleTokens =  rake.getKeyWords(title,false,stopwords,stemmer);
+
+                List<String> keywordsFromTitle = rakeKeyWordsAndSimpleTokens.get(0);
+
+
                 for(String s :keywordsFromTitle) {
 
                     biBCapRecord.addExtractedTerm( s );
@@ -155,7 +159,10 @@ public class BibCapParser {
 
                 }
 
+                biBCapRecord.addAllSimpleBagOfWordTerms( rakeKeyWordsAndSimpleTokens.get(1) );
             }
+
+
 
 
             bibCapRecordStore.putRecord(doc_id, biBCapRecord);
@@ -220,7 +227,7 @@ public class BibCapParser {
 
         reader.close();
 
-        System.out.println("Running RAKE on abstracts..");
+        System.out.println("Running RAKE on abstracts.. Also saving simple Bag-of-Words..");
         for (Integer key : orderedKeySet) {
 
             BibCapRecord record = bibCapRecordStore.getRecord(key);
@@ -230,7 +237,10 @@ public class BibCapParser {
             String summary = record.getAbstractText();
 
             if(summary != null) {
-                List<String> keywordsFromAbstract = rake.getKeyWords(summary, true, stopwords, stemmer);
+                List<List<String>> rakeKeyWordsAndSimpleTokens = rake.getKeyWords(summary, true, stopwords, stemmer);
+
+                List<String> keywordsFromAbstract = rakeKeyWordsAndSimpleTokens.get(0);
+
                 for(String s : keywordsFromAbstract)  {
 
                     record.addExtractedTerm(s);
@@ -245,6 +255,8 @@ public class BibCapParser {
 
                 }
 
+
+                record.addAllSimpleBagOfWordTerms( rakeKeyWordsAndSimpleTokens.get(1) );
 
             }
 

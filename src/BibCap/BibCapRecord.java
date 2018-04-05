@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,7 +31,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     List<BibCapCitedReferenceWithSearchKey> bibCapCitedReference = new ArrayList<>();
     List<String> extractedTerms = new ArrayList<>();
 
-    List<String> simpleBagOfWordTerms = new ArrayList<>(); //TODO FIX THIS
+    List<String> simpleBagOfWordTokens = new ArrayList<>(); //IMPLEMENT THIS
 
     int citationsIncSelf;
     int citationsExclSelf;
@@ -47,7 +46,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms +"\t" + subjectCategories;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms +"\t" + subjectCategories +"\t" + simpleBagOfWordTokens;
 
     }
 
@@ -82,10 +81,26 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
     }
 
+
+    public void addAllSimpleBagOfWordTerms(Collection<String> terms) {
+
+        this.simpleBagOfWordTokens.addAll(terms);
+
+    }
+
+
     public List<String> getExtractedTerms() {
 
         return this.extractedTerms;
     }
+
+    public List<String> getExtractedSimpleBagOfWordTokens() {
+
+        return this.simpleBagOfWordTokens;
+    }
+
+
+
     public int getCitationsIncSelf() {
         return citationsIncSelf;
     }
