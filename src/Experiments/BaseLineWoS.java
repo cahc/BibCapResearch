@@ -107,7 +107,7 @@ public class BaseLineWoS {
 
             reducedRecord.setUT(  fullRecord.getUT() );
             reducedRecord.setCitationsExclSelf( fullRecord.getCitationsExclSelf()  );
-            reducedRecord.subjectCategories = fullRecord.getSubjectCategories();
+            reducedRecord.setSubjectCategories(fullRecord.getSubjectCategories() ) ;
 
             bibCapRecordList.add( reducedRecord );
 
