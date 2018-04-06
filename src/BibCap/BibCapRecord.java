@@ -37,7 +37,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     int citationsExclSelf;
 
 
-    List<String> subjectCategories;
+    public List<String> subjectCategories;
 
     public BibCapRecord() {}
 

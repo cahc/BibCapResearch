@@ -100,13 +100,22 @@ public class BaseLineWoS {
         //mappy.db only contains records with at least one WC
         for(Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
+            BibCapRecord fullRecord = entry.getValue();
+            BibCapRecord reducedRecord = new BibCapRecord();
 
-            bibCapRecordList.add(entry.getValue());
+
+
+            reducedRecord.setUT(  fullRecord.getUT() );
+            reducedRecord.setCitationsExclSelf( fullRecord.getCitationsExclSelf()  );
+            reducedRecord.subjectCategories = fullRecord.getSubjectCategories();
+
+            bibCapRecordList.add( reducedRecord );
 
         }
 
         store.close();
 
+        System.out.println("Read the whole database into memory");
 
         for(BibCapRecord record : bibCapRecordList) {
 
@@ -212,6 +221,46 @@ public class BaseLineWoS {
 
             writer.flush();
             writer.close();
+
+
+            ////////////////////////////////////////////////////////////////////
+            ///////////////////////Jacard based weights wij..//////////////////
+            ///////////////////////////////////////////////////////////////////
+
+
+
+            //step one partition the records based on the subject categories combination profiles
+
+            Object2ObjectOpenHashMap<List<String>,IntList> uniqeCombosOfSubCatToIndices = new Object2ObjectOpenHashMap<>();
+
+            for(int i=0; i<bibCapRecordList.size(); i++ ) {
+
+                List<String> key =  bibCapRecordList.get(i).getSubjectCategories();
+
+                IntList intList = uniqeCombosOfSubCatToIndices.get( key );
+
+                if(intList == null) {
+
+                    intList = new IntArrayList();
+                    intList.add(i);
+                    uniqeCombosOfSubCatToIndices.put(key,intList);
+
+                } else {
+
+                    intList.add(i);
+                }
+
+
+            }
+
+
+            //step two create a inverted index that maps from one (1) subject category to an list of indices of records that har in the category
+
+            Object2ObjectOpenHashMap<String,IntList> subjectCategoryToIndices = new Object2ObjectOpenHashMap<>();
+
+
+
+
 
         }
 

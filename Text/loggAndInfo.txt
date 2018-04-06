@@ -63,7 +63,7 @@ java -cp BibCapResearch.jar NLP.PlaygroundCustomStopWords mappy.db
 #
 
 
-3. Create groups referenses based on similaiity and map to indices
+3. Create groups references based on similarity and map to indices
 
 java -Xmx18G -cp BibCapResearch.jar Index.WriteCitedReferencesToIndices mappy.db 0.925
 
