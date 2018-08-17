@@ -37,7 +37,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     int citationsExclSelf;
 
 
-    public List<String> subjectCategories;
+    List<String> subjectCategories;
 
     public BibCapRecord() {}
 
@@ -68,6 +68,12 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
 
         }
 
+
+        public void setSubjectCategories(List<String> subjectCategories) {
+
+        this.subjectCategories = subjectCategories;
+
+        }
 
 
     public void addExtractedTerm(String term) {

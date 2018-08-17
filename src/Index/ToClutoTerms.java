@@ -92,7 +92,7 @@ public class ToClutoTerms {
 
 
 
-            for(String term : bibCapRecord.getExtractedTerms()) {
+            for(String term : bibCapRecord.getExtractedSimpleBagOfWordTokens() ) { //TODO warning only simple terms
 
 
                 int dim =  termsToIndices.getInt( term );
@@ -136,12 +136,12 @@ public class ToClutoTerms {
         System.out.println("nnz (#non zero values): " +nnz);
 
 
-        System.out.println("IDF weighting..");
+        System.out.println("!!!NO!! IDF weighting..");
 
-        for(SparseDoc d : collectionOfSparseDoc) d.idfWeight(featureToGlobalFrequency,collectionOfSparseDoc.size());
+       // for(SparseDoc d : collectionOfSparseDoc) d.idfWeight(featureToGlobalFrequency,collectionOfSparseDoc.size());
 
-        System.out.println("Normalizing");
-        for(SparseDoc d : collectionOfSparseDoc) d.normalize();
+        System.out.println("!!!!NO!!!! Normalizing");
+        //for(SparseDoc d : collectionOfSparseDoc) d.normalize();
 
 
         //System.out.println("Sorting by dimension");
@@ -149,7 +149,7 @@ public class ToClutoTerms {
 
         //for(SparseDoc d : collectionOfSparseDoc) d.sortByDimensions();
 
-        File file = new File("rawTermVectors.clu");
+        File file = new File("rawTermVectorsV3.clu");
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(file,false));
 

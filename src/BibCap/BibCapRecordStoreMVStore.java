@@ -77,6 +77,7 @@ public class BibCapRecordStoreMVStore implements BibCapRecordStore {
 
         map.remove(key);
 
+
     }
 
     @Override

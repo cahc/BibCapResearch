@@ -52,7 +52,7 @@ public class WriteTermsToIndices {
 
         for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
-            uniqueTerms.addAll( entry.getValue().getExtractedTerms()  );
+            uniqueTerms.addAll( entry.getValue().getExtractedSimpleBagOfWordTokens()  ); // TODO warning, simple terms!
 
         }
 
