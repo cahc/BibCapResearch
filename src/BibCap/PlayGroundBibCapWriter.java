@@ -69,6 +69,7 @@ public class PlayGroundBibCapWriter {
         //writer.flush();
        // writer.close();
 
+        recordStore.saveChanges();
         System.out.println("new # mappings:  " + recordStore.size());
        recordStore.close();
     }

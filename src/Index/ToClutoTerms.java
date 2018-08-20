@@ -11,6 +11,8 @@ import org.h2.mvstore.MVStore;
 import org.h2.mvstore.type.ObjectDataType;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,10 +81,27 @@ public class ToClutoTerms {
         BufferedWriter writeUTtoSeqID = new BufferedWriter( new FileWriter( new File("UTtoIDText.txt")));
         int id = 1;
         int maxDim = -99;
-        for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
+        //refactor, read in internalIdForOrderedAccess.txt and use that order
+        BufferedReader idreader = new BufferedReader( new FileReader( new File("internalIdForOrderedAccess.txt")));
+        List<Integer> orderedIds = new ArrayList<>();
+        String line2;
+        while(  (line2 = idreader.readLine()) != null   ) {
 
-            BibCapRecord bibCapRecord = entry.getValue();
+            String[] parts = line2.split("\t");
+
+            orderedIds.add( Integer.valueOf(parts[0]));
+        }
+
+        idreader.close();
+
+        int N = orderedIds.size();
+
+        //for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
+
+        for(Integer ids : orderedIds) {
+
+            BibCapRecord bibCapRecord =  map.get(ids);  //entry.getValue();
 
             Int2FloatOpenHashMap dimToOccurences = new Int2FloatOpenHashMap(); //TODO why float here?
 
@@ -149,7 +168,7 @@ public class ToClutoTerms {
 
         //for(SparseDoc d : collectionOfSparseDoc) d.sortByDimensions();
 
-        File file = new File("rawTermVectorsV3.clu");
+        File file = new File("rawTermVectorsV4.clu");
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(file,false));
 

@@ -11,6 +11,7 @@ import org.h2.mvstore.MVStore;
 import org.h2.mvstore.type.ObjectDataType;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,11 +82,30 @@ public class ToClutoCR {
         int maxDim = -99;
         BufferedWriter writeUTtoSeqID = new BufferedWriter( new FileWriter( new File("UTtoIDRefs.txt")));
         int id =1;
-        for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
+
+        //refactor, read in internalIdForOrderedAccess.txt and use that order
+        BufferedReader idreader = new BufferedReader( new FileReader( new File("internalIdForOrderedAccess.txt")));
+        List<Integer> orderedIds = new ArrayList<>();
+        String line2;
+        while(  (line2 = idreader.readLine()) != null   ) {
+
+            String[] parts = line2.split("\t");
+
+            orderedIds.add( Integer.valueOf(parts[0]));
+        }
+
+        idreader.close();
+
+        int N = orderedIds.size();
+
+
+       // for (Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
+
+        for(Integer ids : orderedIds) {
 
            Int2FloatOpenHashMap dimToOccurences = new Int2FloatOpenHashMap(); //TODO why float here?
 
-            BibCapRecord bibCapRecord = entry.getValue();
+            BibCapRecord bibCapRecord =  map.get(ids); //entry.getValue();
             List<BibCapCitedReferenceWithSearchKey> references = bibCapRecord.getCitedReferences();
 
             writeUTtoSeqID.write(bibCapRecord.getUT() +"\t" + id);
@@ -133,12 +153,12 @@ public class ToClutoCR {
 
 
 
-        System.out.println("IDF weighting..");
+        System.out.println("NO!! IDF weighting..");
 
-        for(SparseDoc d : collectionOfSparseDoc) d.idfWeight(featureToGlobalFrequency,collectionOfSparseDoc.size());
+       // for(SparseDoc d : collectionOfSparseDoc) d.idfWeight(featureToGlobalFrequency,collectionOfSparseDoc.size());
 
-        System.out.println("Normalizing");
-        for(SparseDoc d : collectionOfSparseDoc) d.normalize();
+        System.out.println("NO!! Normalizing");
+      //  for(SparseDoc d : collectionOfSparseDoc) d.normalize();
 
 
         //System.out.println("Sorting by dimension");
@@ -146,7 +166,7 @@ public class ToClutoCR {
 
         //for(SparseDoc d : collectionOfSparseDoc) d.sortByDimensions();
 
-        File file = new File("rawCRVectors.clu");
+        File file = new File("rawCRVectorsv4.clu");
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(file,false));
 

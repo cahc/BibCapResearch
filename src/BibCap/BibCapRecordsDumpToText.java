@@ -30,18 +30,25 @@ public class BibCapRecordsDumpToText {
         MVMap<Integer, BibCapRecord> map = store.openMap("mymap", new MVMap.Builder<Integer, BibCapRecord>().keyType(new ObjectDataType()).valueType(new BibCapRecord()));
 
         BufferedWriter writer = new BufferedWriter( new FileWriter( new File("RecordsInTextFormat.txt") ));
+        BufferedWriter writer1 = new BufferedWriter(new FileWriter( new File("internalIdForOrderedAccess.txt")));
 
+        int counter = 0;
         for(Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
 
             writer.write(entry.getValue().toString());
             writer.newLine();
+            writer1.write( entry.getValue().internalId +"\t" + counter  );
+            writer1.newLine();
+            counter++;
 
         }
 
 
         writer.flush();
         writer.close();
+        writer1.flush();
+        writer1.close();
 
         store.close();
 
