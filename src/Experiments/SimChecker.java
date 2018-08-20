@@ -84,16 +84,20 @@ public class SimChecker {
 
         while (true) {
 
-            System.out.print("Best match for (1-indexed): ");
+            System.out.print("Best match for (1-indexed, -1 to exit): ");
             String number = scanner.nextLine();
+
+            if(number.equals("-1")) System.exit(0);
 
             simVectorSimple  simVectorSimple = simVectorSimples.get( Integer.valueOf(number)-1  );
             System.out.print("input:");
             System.out.println(titles.get( (Integer.valueOf(number)) -1) );
             System.out.println("best match:");
+            System.out.println();
             System.out.println(titles.get( (simVectorSimple.dims[0])-1 )  ); //?
-            System.out.println("second best match:");
             System.out.println(titles.get( (simVectorSimple.dims[1])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[2])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[3])-1 )  ); //?
             System.out.println();
 
 
