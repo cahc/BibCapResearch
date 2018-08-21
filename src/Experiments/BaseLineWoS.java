@@ -1,6 +1,7 @@
 package Experiments;
 
 import BibCap.BibCapRecord;
+import BibCap.MockBibCapRecord;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -14,9 +15,7 @@ import org.h2.mvstore.type.ObjectDataType;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by crco0001 on 3/13/2018.
@@ -78,6 +77,29 @@ public class BaseLineWoS {
     }
 
 
+    public static float jaccardSim(MockBibCapRecord record1, MockBibCapRecord record2 ) {
+
+        Set<String> record1_scs =   record1.getSubCats();
+        int record1_size = record1_scs.size();
+
+        Set<String> record2_scs =   record2.getSubCats();
+        int record2_size = record2_scs.size();
+
+        float intersection =0;
+        if(record1_size < record2_size) {
+
+            for( String cat : record1_scs) {  if( record2_scs.contains(cat) ) intersection++;  }
+
+
+        } else {
+
+            for( String cat : record2_scs) {  if( record1_scs.contains(cat) ) intersection++;  }
+        }
+
+
+        return (   intersection / (record1_size + record2_size - intersection)  );
+
+    }
 
     public static void main(String[] arg) throws IOException {
 
@@ -94,20 +116,37 @@ public class BaseLineWoS {
 
         Object2IntMap<String> catToFreq = new Object2IntOpenHashMap<>();
         Object2ObjectMap<String,FieldNorm> catToFieldNorm = new Object2ObjectOpenHashMap<>();
-        List<BibCapRecord> bibCapRecordList = new ArrayList<>();
 
+        //List<BibCapRecord> bibCapRecordList = new ArrayList<>();
+
+        List<MockBibCapRecord> bibCapRecordList = new ArrayList<>();
+
+        //refactor, read in internalIdForOrderedAccess.txt and use that order
+        BufferedReader idreader = new BufferedReader( new FileReader( new File("internalIdForOrderedAccess.txt")));
+        List<Integer> orderedIds = new ArrayList<>();
+        String line2;
+        while(  (line2 = idreader.readLine()) != null   ) {
+
+            String[] parts = line2.split("\t");
+
+            orderedIds.add( Integer.valueOf(parts[0]));
+        }
+
+        idreader.close();
 
         //mappy.db only contains records with at least one WC
-        for(Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
+       // for(Map.Entry<Integer, BibCapRecord> entry : map.entrySet()) {
 
-            BibCapRecord fullRecord = entry.getValue();
-            BibCapRecord reducedRecord = new BibCapRecord();
+        for(Integer id : orderedIds) {
+
+            BibCapRecord fullRecord =  map.get(id); //entry.getValue();
+            MockBibCapRecord reducedRecord = new MockBibCapRecord();
 
 
 
             reducedRecord.setUT(  fullRecord.getUT() );
             reducedRecord.setCitationsExclSelf( fullRecord.getCitationsExclSelf()  );
-            reducedRecord.setSubjectCategories(fullRecord.getSubjectCategories() ) ;
+            reducedRecord.addSubCats(fullRecord.getSubjectCategories() );
 
             bibCapRecordList.add( reducedRecord );
 
@@ -117,9 +156,10 @@ public class BaseLineWoS {
 
         System.out.println("Read the whole database into memory");
 
-        for(BibCapRecord record : bibCapRecordList) {
+        for(MockBibCapRecord record : bibCapRecordList) {
 
-            List<String> categories = record.getSubjectCategories();
+            Set<String> categories = record.getSubCats();
+
             int TC_exlSelfCit = record.getCitationsExclSelf();
             int n_cat = categories.size();
 
@@ -146,7 +186,7 @@ public class BaseLineWoS {
 
         BufferedWriter writer1 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_Records_Per_Category.txt")), StandardCharsets.UTF_8) );
 
-        System.out.println("calculating records per ctegory (non frac)");
+        System.out.println("calculating records per category (non frac)");
 
         for(Object2IntMap.Entry<String> set : catToFreq.object2IntEntrySet() ) {
 
@@ -160,7 +200,7 @@ public class BaseLineWoS {
 
         System.out.println("calculating field norms based on WoS");
 
-        BufferedWriter writer0 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_FieldValues.txt")), StandardCharsets.UTF_8) );
+        BufferedWriter writer0 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_FieldValues_harmonicMean.txt")), StandardCharsets.UTF_8) );
 
         for(Map.Entry<String,FieldNorm> entry : catToFieldNorm.entrySet()) {
 
@@ -176,11 +216,11 @@ public class BaseLineWoS {
 
         System.out.println("calculating norms per doc with harmonic mean");
 
-        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues.txt")), StandardCharsets.UTF_8) );
+        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_harmonicMean.txt")), StandardCharsets.UTF_8) );
 
-        for(BibCapRecord record : bibCapRecordList) {
+        for(MockBibCapRecord record : bibCapRecordList) {
 
-            List<String> categories = record.getSubjectCategories();
+            Set<String> categories = record.getSubCats();
             int TC_exlSelfCit = record.getCitationsExclSelf();
             int n_cat = categories.size();
 
@@ -229,34 +269,97 @@ public class BaseLineWoS {
 
 
 
-            //step one partition the records based on the subject categories combination profiles
+        //inverted index, subject category to document ids..
+        System.out.println("building inverted index for speedy Jaccard calculations");
+        Object2ObjectOpenHashMap<String,List<Integer>> subCatToIndex = new Object2ObjectOpenHashMap<>();
 
-            Object2ObjectOpenHashMap<List<String>,IntList> uniqeCombosOfSubCatToIndices = new Object2ObjectOpenHashMap<>();
+        for(int i=0; i<bibCapRecordList.size(); i++ ) {
 
-            for(int i=0; i<bibCapRecordList.size(); i++ ) {
+            Set<String> subcats = bibCapRecordList.get(i).getSubCats();
 
-                List<String> key =  bibCapRecordList.get(i).getSubjectCategories();
+            for(String s : subcats) {
 
-                IntList intList = uniqeCombosOfSubCatToIndices.get( key );
+                List<Integer> docids = subCatToIndex.get(s);
 
-                if(intList == null) {
+                if(docids == null) {
 
-                    intList = new IntArrayList();
-                    intList.add(i);
-                    uniqeCombosOfSubCatToIndices.put(key,intList);
+                    docids = new ArrayList<Integer>();
+                    docids.add(i);
+                    subCatToIndex.put(s,docids);
 
                 } else {
 
-                    intList.add(i);
-                }
+                    docids.add(i);
 
+
+                }
 
             }
 
+        }
 
-            //step two create a inverted index that maps from one (1) subject category to an list of indices of records that har in the category
 
-            Object2ObjectOpenHashMap<String,IntList> subjectCategoryToIndices = new Object2ObjectOpenHashMap<>();
+        //calculat jaccard
+
+        System.out.println("Starting calculations..");
+        for(int i=0; i<bibCapRecordList.size(); i++ ) {
+
+            MockBibCapRecord targetDoc = bibCapRecordList.get(i);
+            Set<String> subcats = targetDoc.getSubCats();
+            HashSet<Integer> docIdsInReferenceSet = new HashSet<>();
+
+            for(String s : subcats) docIdsInReferenceSet.addAll( subCatToIndex.get(s) );
+            docIdsInReferenceSet.remove(i);  //don't include yourself
+
+            //now we know which docids that have a positive weight, but not we dont know which weight..
+
+            for(Integer idInRefSet : docIdsInReferenceSet) {
+
+                MockBibCapRecord referenceDoc = bibCapRecordList.get(idInRefSet);
+
+                float sim = jaccardSim(targetDoc, bibCapRecordList.get(idInRefSet));
+
+                //debug
+               // System.out.println(sim +" " +targetDoc.getSubCats() + "****" + referenceDoc.getSubCats());
+
+            }
+
+            //todo: all docs that share unique combos of subcats must share the same set of potential refdocs
+            //and we can pre-calculate the weights of these and also the reference value..
+
+          
+            //System.out.println("potentials: " + docIdsInReferenceSet.size()) ;
+
+            if( (i % 5000) == 0) System.out.println(i);
+
+
+        }
+
+
+
+        /*
+                    //pre calculate for all observed variations
+
+        HashSet<List<String>> uniqueVariations = new HashSet<>();
+        for(int i=0; i<bibCapRecordList.size(); i++ ) {
+
+            List<String> subcats = bibCapRecordList.get(i).getSubjectCategories();
+            uniqueVariations.add(subcats);
+
+
+        }
+
+        for(List<String> versions : uniqueVariations) {
+
+         System.out.println(versions);
+
+        }
+
+        System.out.println("unique versions: " + uniqueVariations.size());
+
+
+         */
+
 
 
 

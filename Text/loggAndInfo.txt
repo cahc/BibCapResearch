@@ -93,7 +93,11 @@ Documents/rows: 955646
 Features/column: 12317063
 nnz (#non zero values): 31313038
 
-7. Now switch no linux and run knng --> see scripts runner*.sh
+7. Now switch no linux and run knng --> see scripts *batch.sh
+
+9. compare top docs..
+
+java -cp BibCapResearch.jar Experiments.SimChecker secondOrderSimCitedRefsK150.clu
 
 9. create SC-baselie
 

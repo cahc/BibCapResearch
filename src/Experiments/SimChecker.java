@@ -98,6 +98,11 @@ public class SimChecker {
             System.out.println(titles.get( (simVectorSimple.dims[1])-1 )  ); //?
             System.out.println(titles.get( (simVectorSimple.dims[2])-1 )  ); //?
             System.out.println(titles.get( (simVectorSimple.dims[3])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[4])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[5])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[6])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[7])-1 )  ); //?
+            System.out.println(titles.get( (simVectorSimple.dims[8])-1 )  ); //?
             System.out.println();
 
 
