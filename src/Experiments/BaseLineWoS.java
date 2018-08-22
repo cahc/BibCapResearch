@@ -4,10 +4,13 @@ import BibCap.BibCapRecord;
 import BibCap.MockBibCapRecord;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.type.ObjectDataType;
@@ -100,6 +103,32 @@ public class BaseLineWoS {
         return (   intersection / (record1_size + record2_size - intersection)  );
 
     }
+
+
+    public static float jaccardSim(Set<String> subcatsForRecord1, MockBibCapRecord record2 ) {
+
+        Set<String> record1_scs =   subcatsForRecord1;
+        int record1_size = record1_scs.size();
+
+        Set<String> record2_scs =   record2.getSubCats();
+        int record2_size = record2_scs.size();
+
+        float intersection =0;
+        if(record1_size < record2_size) {
+
+            for( String cat : record1_scs) {  if( record2_scs.contains(cat) ) intersection++;  }
+
+
+        } else {
+
+            for( String cat : record2_scs) {  if( record1_scs.contains(cat) ) intersection++;  }
+        }
+
+
+        return (   intersection / (record1_size + record2_size - intersection)  );
+
+    }
+
 
     public static void main(String[] arg) throws IOException {
 
@@ -268,10 +297,28 @@ public class BaseLineWoS {
             ///////////////////////////////////////////////////////////////////
 
 
+            //Step 1: unique combos of subject categories
 
-        //inverted index, subject category to document ids..
-        System.out.println("building inverted index for speedy Jaccard calculations");
-        Object2ObjectOpenHashMap<String,List<Integer>> subCatToIndex = new Object2ObjectOpenHashMap<>();
+        HashSet<Set<String>> uniqueCombinationsOfSubjectCategories = new HashSet<>();
+        for(int i=0; i<bibCapRecordList.size(); i++ ) {
+
+            Set<String> subcats = bibCapRecordList.get(i).getSubCats();
+            uniqueCombinationsOfSubjectCategories.add(subcats);
+
+
+        }
+
+
+        System.out.println("# unique combinations of subject categories: " + uniqueCombinationsOfSubjectCategories.size());
+
+
+
+
+
+
+        //step 2: inverted index, subject category to document ids..
+        System.out.println("building inverted index for single subcat to docIdList");
+        Object2ObjectOpenHashMap<String,List<Integer>> singleSubCatToDocIndex = new Object2ObjectOpenHashMap<>();
 
         for(int i=0; i<bibCapRecordList.size(); i++ ) {
 
@@ -279,13 +326,13 @@ public class BaseLineWoS {
 
             for(String s : subcats) {
 
-                List<Integer> docids = subCatToIndex.get(s);
+                List<Integer> docids = singleSubCatToDocIndex.get(s);
 
                 if(docids == null) {
 
                     docids = new ArrayList<Integer>();
                     docids.add(i);
-                    subCatToIndex.put(s,docids);
+                    singleSubCatToDocIndex.put(s,docids);
 
                 } else {
 
@@ -299,16 +346,95 @@ public class BaseLineWoS {
         }
 
 
-        //calculat jaccard
 
-        System.out.println("Starting calculations..");
+        //Step  3: map each unique combo of subcats to potential target doc ids (i.e., all ids sharing at least one subcat)
+
+        HashMap<Set<String>,IntOpenHashSet> subCatCombosToPotentialRefDocs = new HashMap<>();
+        HashSet<String> test = new HashSet<>();
+        int v=0;
+        for(Set<String> combo : uniqueCombinationsOfSubjectCategories) {
+
+            IntOpenHashSet potentialTargetsForEachCombo = new IntOpenHashSet();
+
+            for(String s: combo) potentialTargetsForEachCombo.addAll( singleSubCatToDocIndex.get(s) );
+
+            subCatCombosToPotentialRefDocs.put(combo,potentialTargetsForEachCombo);
+
+            if(v==0) test.addAll(combo);
+            v++;
+        }
+
+        System.out.println("map size: " + subCatCombosToPotentialRefDocs.size());
+        System.out.println("first combo potential size: " + subCatCombosToPotentialRefDocs.get(test).size());
+
+
+
+
+
+        //step 4 calculat referense values for each subcat combo based on jaccard weights..
+
+        System.out.println("Starting jaccardbased refvalculations calculations..");
+
+        HashMap<Set<String>, Double> combosToRefValues = new HashMap<>();
+        for(Map.Entry<Set<String>,IntOpenHashSet> entry : subCatCombosToPotentialRefDocs.entrySet() ) {
+
+            Set<String>  subcatCombo = entry.getKey();
+            IntOpenHashSet targetDocs = entry.getValue();
+
+            int[] citations = new int[targetDocs.size()];
+            float[] weights = new float[targetDocs.size()];
+            int j=0;
+            for(int i : targetDocs) {
+
+                MockBibCapRecord targetDoc = bibCapRecordList.get(i);
+                int cit = targetDoc.getCitationsExclSelf();
+                citations[j] = cit;
+                float weight = jaccardSim(subcatCombo,targetDoc);
+                weights[j] = weight;
+                j++;
+            }
+
+            double sumweights = 0;
+            for(int i=0; i<weights.length; i++) sumweights=weights[i]+sumweights;
+
+            double wightedCitationsSum =0;
+
+            for(int i=0; i<weights.length; i++) wightedCitationsSum = (weights[i]*citations[i])+wightedCitationsSum;
+
+            combosToRefValues.put(subcatCombo,  (wightedCitationsSum/sumweights)  );
+        }
+
+        //  for(Map.Entry<Set<String>,Double> fieldValue : combosToRefValues.entrySet()) {
+
+
+        //   System.out.println(fieldValue.getKey() +"\t" + fieldValue.getValue());
+        //     }
+
+
+        System.out.println("calculating norms per doc with jaccard");
+
+        BufferedWriter writer2 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_jaccard.txt")), StandardCharsets.UTF_8) );
+
+        for(MockBibCapRecord record : bibCapRecordList) {
+
+           Double refvalue = combosToRefValues.get(record.getSubCats());
+
+           writer2.write(record.getUT() +"\t" + record.getCitationsExclSelf() +"\t" +refvalue +"\t" + record.getSubCats());
+           writer2.newLine();
+        }
+
+        writer2.flush();
+        writer2.close();
+
+        System.exit(0);
+
         for(int i=0; i<bibCapRecordList.size(); i++ ) {
 
             MockBibCapRecord targetDoc = bibCapRecordList.get(i);
             Set<String> subcats = targetDoc.getSubCats();
             HashSet<Integer> docIdsInReferenceSet = new HashSet<>();
 
-            for(String s : subcats) docIdsInReferenceSet.addAll( subCatToIndex.get(s) );
+            for(String s : subcats) docIdsInReferenceSet.addAll( singleSubCatToDocIndex.get(s) );
             docIdsInReferenceSet.remove(i);  //don't include yourself
 
             //now we know which docids that have a positive weight, but not we dont know which weight..
@@ -317,17 +443,17 @@ public class BaseLineWoS {
 
                 MockBibCapRecord referenceDoc = bibCapRecordList.get(idInRefSet);
 
-                float sim = jaccardSim(targetDoc, bibCapRecordList.get(idInRefSet));
+                float sim = jaccardSim(targetDoc, referenceDoc );
 
                 //debug
                // System.out.println(sim +" " +targetDoc.getSubCats() + "****" + referenceDoc.getSubCats());
 
             }
 
-            //todo: all docs that share unique combos of subcats must share the same set of potential refdocs
+            //todo: all docs that share unique combos (some 12 thousand or so) of subcats must share the same set of potential refdocs
             //and we can pre-calculate the weights of these and also the reference value..
 
-          
+
             //System.out.println("potentials: " + docIdsInReferenceSet.size()) ;
 
             if( (i % 5000) == 0) System.out.println(i);
