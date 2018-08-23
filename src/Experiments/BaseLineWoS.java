@@ -134,6 +134,8 @@ public class BaseLineWoS {
 
         if(arg.length != 1) { System.out.println("Supply db"); System.exit(0); }
 
+        System.out.println("Working with log1p(x) of citations!");
+
         MVStore store = new MVStore.Builder().cacheSize(200). // 200MB read cache
                 fileName(arg[0]).autoCommitBufferSize(1024). // 1MB write cache
                 open(); // autoCommitBufferSize
@@ -175,6 +177,8 @@ public class BaseLineWoS {
 
             reducedRecord.setUT(  fullRecord.getUT() );
             reducedRecord.setCitationsExclSelf( fullRecord.getCitationsExclSelf()  );
+           //log!
+            reducedRecord.setCitationExclSefLog1p(  Math.log1p(fullRecord.getCitationsExclSelf() )   );
             reducedRecord.addSubCats(fullRecord.getSubjectCategories() );
 
             bibCapRecordList.add( reducedRecord );
@@ -189,7 +193,7 @@ public class BaseLineWoS {
 
             Set<String> categories = record.getSubCats();
 
-            int TC_exlSelfCit = record.getCitationsExclSelf();
+            double TC_exlSelfCit = record.getCitationExclSefLog1p(); //record.getCitationsExclSelf();
             int n_cat = categories.size();
 
             for(String s : categories) {
@@ -229,7 +233,7 @@ public class BaseLineWoS {
 
         System.out.println("calculating field norms based on WoS");
 
-        BufferedWriter writer0 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_FieldValues_harmonicMean.txt")), StandardCharsets.UTF_8) );
+        BufferedWriter writer0 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_harmonicMean.txt")), StandardCharsets.UTF_8) );
 
         for(Map.Entry<String,FieldNorm> entry : catToFieldNorm.entrySet()) {
 
@@ -245,12 +249,12 @@ public class BaseLineWoS {
 
         System.out.println("calculating norms per doc with harmonic mean");
 
-        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_harmonicMean.txt")), StandardCharsets.UTF_8) );
+        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_harmonicMean_perDoc.txt")), StandardCharsets.UTF_8) );
 
         for(MockBibCapRecord record : bibCapRecordList) {
 
             Set<String> categories = record.getSubCats();
-            int TC_exlSelfCit = record.getCitationsExclSelf();
+            double TC_exlSelfCit = record.getCitationExclSefLog1p(); //record.getCitationsExclSelf();
             int n_cat = categories.size();
 
             List<FieldNorm> fieldNormList = new ArrayList<>();
@@ -381,13 +385,13 @@ public class BaseLineWoS {
             Set<String>  subcatCombo = entry.getKey();
             IntOpenHashSet targetDocs = entry.getValue();
 
-            int[] citations = new int[targetDocs.size()];
+            double[] citations = new double[targetDocs.size()];
             float[] weights = new float[targetDocs.size()];
             int j=0;
             for(int i : targetDocs) {
 
                 MockBibCapRecord targetDoc = bibCapRecordList.get(i);
-                int cit = targetDoc.getCitationsExclSelf();
+                double cit = targetDoc.getCitationExclSefLog1p();  //getCitationsExclSelf();
                 citations[j] = cit;
                 float weight = jaccardSim(subcatCombo,targetDoc);
                 weights[j] = weight;
@@ -413,80 +417,64 @@ public class BaseLineWoS {
 
         System.out.println("calculating norms per doc with jaccard");
 
-        BufferedWriter writer2 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_jaccard.txt")), StandardCharsets.UTF_8) );
+        BufferedWriter writer2 = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(new File("WoS_based_refValues_jaccard_perDoc.txt")), StandardCharsets.UTF_8) );
 
         for(MockBibCapRecord record : bibCapRecordList) {
 
            Double refvalue = combosToRefValues.get(record.getSubCats());
 
-           writer2.write(record.getUT() +"\t" + record.getCitationsExclSelf() +"\t" +refvalue +"\t" + record.getSubCats());
+           writer2.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" +refvalue +"\t" + record.getSubCats());
            writer2.newLine();
         }
 
         writer2.flush();
         writer2.close();
 
-        System.exit(0);
 
-        for(int i=0; i<bibCapRecordList.size(); i++ ) {
+
+        System.out.println("Running some straight forward calculations for comparisons..");
+
+        for(int i=0; i<10; i++ ) {
 
             MockBibCapRecord targetDoc = bibCapRecordList.get(i);
             Set<String> subcats = targetDoc.getSubCats();
             HashSet<Integer> docIdsInReferenceSet = new HashSet<>();
 
             for(String s : subcats) docIdsInReferenceSet.addAll( singleSubCatToDocIndex.get(s) );
-            docIdsInReferenceSet.remove(i);  //don't include yourself
+            //docIdsInReferenceSet.remove(i);  //don't include yourself
 
-            //now we know which docids that have a positive weight, but not we dont know which weight..
+            //now we know which docids that have a positive weight, but not we don't know which weight..
 
+            double[] cit = new double[ docIdsInReferenceSet.size() ];
+            double[] weights = new double[docIdsInReferenceSet.size()];
+
+            int k=0;
             for(Integer idInRefSet : docIdsInReferenceSet) {
 
                 MockBibCapRecord referenceDoc = bibCapRecordList.get(idInRefSet);
-
+                double citval = referenceDoc.getCitationExclSefLog1p();
                 float sim = jaccardSim(targetDoc, referenceDoc );
 
+                cit[k] = citval;
+                weights[k] = sim;
                 //debug
                // System.out.println(sim +" " +targetDoc.getSubCats() + "****" + referenceDoc.getSubCats());
+                k++;
 
             }
 
-            //todo: all docs that share unique combos (some 12 thousand or so) of subcats must share the same set of potential refdocs
-            //and we can pre-calculate the weights of these and also the reference value..
+            double sumweights = 0;
+            for(int z=0; z<weights.length; z++) sumweights=weights[z]+sumweights;
 
+            double wightedCitationsSum =0;
 
-            //System.out.println("potentials: " + docIdsInReferenceSet.size()) ;
+            for(int z=0; z<weights.length; z++) wightedCitationsSum = (weights[z]*cit[z])+wightedCitationsSum;
 
-            if( (i % 5000) == 0) System.out.println(i);
+            System.out.println(targetDoc.getSubCats() + "\t" + (wightedCitationsSum/sumweights) );
 
-
-        }
-
-
-
-        /*
-                    //pre calculate for all observed variations
-
-        HashSet<List<String>> uniqueVariations = new HashSet<>();
-        for(int i=0; i<bibCapRecordList.size(); i++ ) {
-
-            List<String> subcats = bibCapRecordList.get(i).getSubjectCategories();
-            uniqueVariations.add(subcats);
 
 
         }
-
-        for(List<String> versions : uniqueVariations) {
-
-         System.out.println(versions);
-
-        }
-
-        System.out.println("unique versions: " + uniqueVariations.size());
-
-
-         */
-
-
 
 
 

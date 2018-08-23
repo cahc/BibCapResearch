@@ -8,6 +8,8 @@ public class MockBibCapRecord extends BibCapRecord {
 
     HashSet<String> subjectCategories = new HashSet<>();
 
+    double citationExclSefLog1p;
+
     public void addSubCats(List<String> subcats) {
 
         subjectCategories.addAll(subcats);
@@ -20,6 +22,15 @@ public class MockBibCapRecord extends BibCapRecord {
         return subjectCategories;
     }
 
+    public void setCitationExclSefLog1p(double citationExclSefLog1p1) {
+
+        this.citationExclSefLog1p = citationExclSefLog1p1;
+    }
+
+    public double getCitationExclSefLog1p() {
+
+        return this.citationExclSefLog1p;
+    }
 
     public MockBibCapRecord() { super(); }
 }

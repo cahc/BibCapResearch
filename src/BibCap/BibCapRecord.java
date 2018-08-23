@@ -123,6 +123,8 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
         this.citationsExclSelf = citationsExclSelf;
     }
 
+
+
     public List<BibCapCitedReferenceWithSearchKey> getCitedReferences() {
 
         return bibCapCitedReference;
