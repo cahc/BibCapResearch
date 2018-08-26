@@ -265,9 +265,25 @@ public class BaseLineSim {
 
         int maxK=50;
 
-        BufferedWriter writer = new BufferedWriter( new FileWriter( new File("SimBasedRefVals.txt")));
+       // BufferedWriter writer = new BufferedWriter( new FileWriter( new File("SimBasedRefVals.txt")));
 
         //The order here correspond to the indices in List<Simplevector>
+
+        double D= 0;
+        double Dx = 0;
+
+        double mean = 0;
+
+        for(double cit : citationDistribution) mean=mean+cit;
+
+        mean = mean/citationDistribution.size();
+
+        for(double cit : citationDistribution) D = D+Math.pow(cit-mean,2);
+
+        System.out.println("mean: " +mean);
+        System.out.println("D: " + D);
+
+
         int targetIndice=0;
         for(MockBibCapRecord record : bibCapRecordList) {
 
@@ -318,16 +334,26 @@ public class BaseLineSim {
             }
 
 
-            writer.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" + (totalWeightedCitationSum/totalWeighs) );
-            writer.newLine();
+            Dx = Dx + Math.pow( (cit- (totalWeightedCitationSum/totalWeighs)  )  ,2);
+
+           // writer.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" + (totalWeightedCitationSum/totalWeighs) );
+           // writer.newLine();
+
+
             targetIndice++;
         }
 
-        writer.flush();
-        writer.close();
+        System.out.println("Dx: " + Dx);
+        System.out.println("indicator: " + (D - Dx)/D );
+
+       // writer.flush();
+       // writer.close();
 
 
 
+
+        //explain 9.7%
+        //explain 21.1%
 
 
 
