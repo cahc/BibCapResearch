@@ -103,3 +103,17 @@ java -cp BibCapResearch.jar Experiments.SimChecker secondOrderSimCitedRefsK150.c
 
 java -cp BibCapResearch.jar Experiments.BaseLineWoS mappy.db
 
+10. run parameter search
+
+java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineSim mappy.db
+
+#contour in R
+parameterSearch <- read.table("ParameterSearch.txt")
+View(parameterSearch)
+colnames(parameterSearch) <- c("Delta", "K", "RES")
+
+Z <- acast(parameterSearch, Delta ~ K )
+contour(x=c(0,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,1),y=seq(10,150,by=10),Z,xlab="delta", ylab="k", main="proportion of the total variance explained")
+
+
+
