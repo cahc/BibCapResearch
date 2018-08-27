@@ -263,15 +263,12 @@ public class BaseLineSim {
        // System.out.println("first vector from term: " + termBased.get(0));
 
 
-        int maxK=50;
 
-       // BufferedWriter writer = new BufferedWriter( new FileWriter( new File("SimBasedRefVals.txt")));
+       BufferedWriter writer = new BufferedWriter( new FileWriter( new File("ParameterSearch.txt")));
 
         //The order here correspond to the indices in List<Simplevector>
 
         double D= 0;
-        double Dx = 0;
-
         double mean = 0;
 
         for(double cit : citationDistribution) mean=mean+cit;
@@ -284,70 +281,158 @@ public class BaseLineSim {
         System.out.println("D: " + D);
 
 
-        int targetIndice=0;
-        for(MockBibCapRecord record : bibCapRecordList) {
 
-           double cit = record.getCitationExclSefLog1p();
-           SimpleVector targetVectorCitBased = citationBased.get(targetIndice);
-           SimpleVector targetVectorTermBased = termBased.get(targetIndice);
+        //todo loop here, over weight parameter
 
-           //get reference values:
+         DoubleList delta = new DoubleArrayList();
+         delta.add(0.0);
+         delta.add(0.05);
+         delta.add(0.1);
+         delta.add(0.2);
+         delta.add(0.3);
+         delta.add(0.4);
+         delta.add(0.5);
+         delta.add(0.6);
+         delta.add(0.7);
+         delta.add(0.8);
+         delta.add(0.9);
+         delta.add(0.95);
+         delta.add(1.0);
 
-           DoubleList refCit = new DoubleArrayList();
-           DoubleList refCitWeights = new DoubleArrayList();
+         IntList neighbours = new IntArrayList();
+         neighbours.add(10); neighbours.add(20); neighbours.add(30); neighbours.add(40); neighbours.add(50); neighbours.add(60); neighbours.add(70); neighbours.add(80);
+         neighbours.add(90); neighbours.add(100); neighbours.add(110); neighbours.add(120); neighbours.add(130); neighbours.add(140); neighbours.add(150);
 
-           for(int i=0; i<targetVectorCitBased.indices.size(); i++) {
+       for(int k : neighbours) {
+           System.out.println("Using k=" + k);
 
-               refCit.add(  citationDistribution.getDouble( targetVectorCitBased.indices.getInt(i)  )  ) ;
-               refCitWeights.add(  targetVectorCitBased.values.getDouble(i)   );
+           for (double deltaWeight : delta) {
 
-               if(i==maxK) break;
-            }
+               double Dx = 0;
+               double oneMinusDelta = 1 - deltaWeight;
 
-            DoubleList refTerm = new DoubleArrayList();
-            DoubleList termWeights = new DoubleArrayList();
+               int targetIndice = 0;
+               for (MockBibCapRecord record : bibCapRecordList) {
 
-            for(int i=0; i<targetVectorTermBased.indices.size(); i++) {
+                   double cit = record.getCitationExclSefLog1p();
+                   SimpleVector targetVectorCitBased = citationBased.get(targetIndice);
+                   SimpleVector targetVectorTermBased = termBased.get(targetIndice);
 
-                refTerm.add(  citationDistribution.getDouble( targetVectorTermBased.indices.getInt(i) ) );
-                termWeights.add(  targetVectorTermBased.values.getDouble(i)   );
+                   //get reference values:
 
-                if(i==maxK) break;
-            }
+                   DoubleList refCit = new DoubleArrayList();
+                   DoubleList refCitWeights = new DoubleArrayList();
 
+                   for (int i = 0; i < targetVectorCitBased.indices.size(); i++) {
 
-            double totalWeightedCitationSum = 0;
-            double totalWeighs = 0;
-
-
-            for(int i=0; i<refCit.size(); i++) {
-
-                totalWeightedCitationSum = totalWeightedCitationSum+ (refCit.getDouble(i)*refCitWeights.getDouble(i) );
-                totalWeighs = totalWeighs+refCitWeights.getDouble(i);
-            }
-
-
-            for(int i=0; i<refTerm.size(); i++) {
-
-                totalWeightedCitationSum = totalWeightedCitationSum+ (refTerm.getDouble(i)*termWeights.getDouble(i) );
-                totalWeighs = totalWeighs + termWeights.getDouble(i);
-            }
+                       refCit.add(citationDistribution.getDouble(targetVectorCitBased.indices.getInt(i)));
+                       refCitWeights.add(targetVectorCitBased.values.getDouble(i));
 
 
-            Dx = Dx + Math.pow( (cit- (totalWeightedCitationSum/totalWeighs)  )  ,2);
+                       if (i == k) break;
+                   }
 
-           // writer.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" + (totalWeightedCitationSum/totalWeighs) );
-           // writer.newLine();
+                   //normalize cit weight distribution
+
+                   double normalizeWeightsRef = 0;
+
+                   for (double weight : refCitWeights) normalizeWeightsRef = normalizeWeightsRef + weight;
+                   normalizeWeightsRef = normalizeWeightsRef / refCitWeights.size();
+
+                   for (int i = 0; i < refCitWeights.size(); i++) {
+
+                       refCitWeights.set(i, refCitWeights.getDouble(i) / normalizeWeightsRef);
+                   }
 
 
-            targetIndice++;
-        }
+                   DoubleList refTerm = new DoubleArrayList();
+                   DoubleList termWeights = new DoubleArrayList();
 
-        System.out.println("Dx: " + Dx);
-        System.out.println("indicator: " + (D - Dx)/D );
+                   for (int i = 0; i < targetVectorTermBased.indices.size(); i++) {
 
-       // writer.flush();
-       // writer.close();
+                       refTerm.add(citationDistribution.getDouble(targetVectorTermBased.indices.getInt(i)));
+                       termWeights.add(targetVectorTermBased.values.getDouble(i));
+
+                       if (i == k) break;
+                   }
+
+                   //normalize term weights
+
+
+                   double normalizeWeightsTerms = 0;
+
+                   for (double weight : termWeights) normalizeWeightsTerms = normalizeWeightsTerms + weight;
+                   normalizeWeightsTerms = normalizeWeightsTerms / termWeights.size();
+
+                   for (int i = 0; i < termWeights.size(); i++) {
+
+                       termWeights.set(i, termWeights.getDouble(i) / normalizeWeightsTerms);
+                   }
+
+
+                   //apply delta weighting..
+
+                   for (int i = 0; i < refCitWeights.size(); i++) {
+
+                       refCitWeights.set(i, refCitWeights.getDouble(i) * deltaWeight);
+                   }
+
+                   for (int i = 0; i < termWeights.size(); i++) {
+
+                       termWeights.set(i, termWeights.getDouble(i) * oneMinusDelta);
+                   }
+
+
+                   double totalWeightedCitationSum = 0;
+                   double totalWeighs = 0;
+
+                   //create ref value, weight with delta
+
+                   for (int i = 0; i < refCit.size(); i++) {
+
+                       totalWeightedCitationSum = totalWeightedCitationSum + (refCit.getDouble(i) * refCitWeights.getDouble(i));
+                       totalWeighs = totalWeighs + refCitWeights.getDouble(i);
+                   }
+
+
+                   for (int i = 0; i < refTerm.size(); i++) {
+
+                       totalWeightedCitationSum = totalWeightedCitationSum + (refTerm.getDouble(i) * termWeights.getDouble(i));
+                       totalWeighs = totalWeighs + termWeights.getDouble(i);
+                   }
+
+                   //FALLBACK, if one weight is 1, that it can be the case that we dont have any refvalue!
+
+                   if (totalWeighs <= 0.0) {
+
+                       Dx = Dx + Math.pow((cit - (mean)), 2); //just guess the mean of the dist
+
+                   } else {
+
+                       Dx = Dx + Math.pow((cit - (totalWeightedCitationSum / totalWeighs)), 2);
+                   }
+
+
+                   // writer.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" + (totalWeightedCitationSum/totalWeighs) );
+                   // writer.newLine();
+
+
+                   targetIndice++;
+               }
+
+               //System.out.println("Dx: " + Dx);
+
+               System.out.println(deltaWeight +"\t" + k + "\t" + (D - Dx) / D );
+                writer.write(deltaWeight +"\t" + k + "\t" + (D - Dx) / D );
+               writer.newLine();
+
+
+           }
+
+       }
+
+        writer.flush();
+        writer.close();
 
 
 
