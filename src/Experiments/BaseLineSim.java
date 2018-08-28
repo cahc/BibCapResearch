@@ -190,7 +190,7 @@ public class BaseLineSim {
 
         public static void main(String[] arg) throws IOException {
 
-            if(arg.length != 1) { System.out.println("Supply db"); System.exit(0); }
+            if(arg.length != 3) { System.out.println("Supply db RefbasedSimMatrix.clu TermBasedSimMatrix.clu"); System.exit(0); }
 
         System.out.println("Working with log1p(x) of citations!");
 
@@ -252,7 +252,7 @@ public class BaseLineSim {
         System.out.println("Read the whole database into memory");
 
 
-        List<List<SimpleVector>> clutofiles = readl2knngOrderedClustoFiles("secondOrderSimCitedRefsK150.clu","secondOrderSimTermsK150.clu");
+        List<List<SimpleVector>> clutofiles = readl2knngOrderedClustoFiles(arg[1],arg[2]);
 
         //OBSERVE THAT INDICES ARE NOW ZERO-BASED!!!!!!!!!!
         List<SimpleVector> citationBased = clutofiles.get(0);
@@ -288,20 +288,28 @@ public class BaseLineSim {
          delta.add(0.0);
          delta.add(0.05);
          delta.add(0.1);
+         delta.add(0.15);
          delta.add(0.2);
+         delta.add(0.25);
          delta.add(0.3);
+         delta.add(0.35);
          delta.add(0.4);
+         delta.add(0.45);
          delta.add(0.5);
+         delta.add(0.55);
          delta.add(0.6);
+         delta.add(0.65);
          delta.add(0.7);
+         delta.add(0.75);
          delta.add(0.8);
+         delta.add(0.85);
          delta.add(0.9);
          delta.add(0.95);
          delta.add(1.0);
 
          IntList neighbours = new IntArrayList();
-         neighbours.add(10); neighbours.add(20); neighbours.add(30); neighbours.add(40); neighbours.add(50); neighbours.add(60); neighbours.add(70); neighbours.add(80);
-         neighbours.add(90); neighbours.add(100); neighbours.add(110); neighbours.add(120); neighbours.add(130); neighbours.add(140); neighbours.add(150);
+         neighbours.add(10); neighbours.add(15); neighbours.add(20); neighbours.add(25); neighbours.add(30); neighbours.add(35); neighbours.add(40); neighbours.add(45); neighbours.add(50); neighbours.add(55); neighbours.add(60); neighbours.add(65); neighbours.add(70); neighbours.add(75); neighbours.add(80);
+            neighbours.add(85); neighbours.add(90); neighbours.add(95); neighbours.add(100); neighbours.add(105);neighbours.add(110); neighbours.add(115); neighbours.add(120); neighbours.add(125); neighbours.add(130); neighbours.add(135); neighbours.add(140); neighbours.add(145); neighbours.add(150);
 
        for(int k : neighbours) {
            System.out.println("Using k=" + k);
