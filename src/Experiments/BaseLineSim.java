@@ -308,7 +308,7 @@ public class BaseLineSim {
          delta.add(1.0);
 
          IntList neighbours = new IntArrayList();
-         neighbours.add(10); neighbours.add(15); neighbours.add(20); neighbours.add(25); neighbours.add(30); neighbours.add(35); neighbours.add(40); neighbours.add(45); neighbours.add(50); neighbours.add(55); neighbours.add(60); neighbours.add(65); neighbours.add(70); neighbours.add(75); neighbours.add(80);
+         neighbours.add(1); neighbours.add(2); neighbours.add(5); neighbours.add(10); neighbours.add(15); neighbours.add(20); neighbours.add(25); neighbours.add(30); neighbours.add(35); neighbours.add(40); neighbours.add(45); neighbours.add(50); neighbours.add(55); neighbours.add(60); neighbours.add(65); neighbours.add(70); neighbours.add(75); neighbours.add(80);
             neighbours.add(85); neighbours.add(90); neighbours.add(95); neighbours.add(100); neighbours.add(105);neighbours.add(110); neighbours.add(115); neighbours.add(120); neighbours.add(125); neighbours.add(130); neighbours.add(135); neighbours.add(140); neighbours.add(145); neighbours.add(150);
 
        for(int k : neighbours) {
@@ -337,7 +337,7 @@ public class BaseLineSim {
                        refCitWeights.add(targetVectorCitBased.values.getDouble(i));
 
 
-                       if (i == k) break;
+                       if ( (i+1) == k) break;
                    }
 
                    //normalize cit weight distribution
@@ -361,7 +361,7 @@ public class BaseLineSim {
                        refTerm.add(citationDistribution.getDouble(targetVectorTermBased.indices.getInt(i)));
                        termWeights.add(targetVectorTermBased.values.getDouble(i));
 
-                       if (i == k) break;
+                       if ((i+1) == k) break;
                    }
 
                    //normalize term weights
