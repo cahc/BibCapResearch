@@ -95,7 +95,7 @@ public class BibCapParser {
 
 
 
-    public void parse(BibCapRecordStore bibCapRecordStore) throws IOException {
+    public void parse(BibCapRecordStore bibCapRecordStore, boolean useNgram) throws IOException {
 
 
         System.out.println("Loading Rake..");
@@ -147,16 +147,19 @@ public class BibCapParser {
 
                 for(String s :keywordsFromTitle) {
 
-                    biBCapRecord.addExtractedTerm( s );
+                    biBCapRecord.addExtractedTerm(s);
 
-                    if(Ngram.countWords(s) > 2) {
 
-                        String[] extracted2grams = Ngram.wordNgrams(s,2);
+                    if (useNgram) {
+                        if (Ngram.countWords(s) > 2) {
 
-                        biBCapRecord.addAllExtractedTerms( Arrays.asList(extracted2grams) );
+                            String[] extracted2grams = Ngram.wordNgrams(s, 2); //TODO skip this?
+
+                            biBCapRecord.addAllExtractedTerms(Arrays.asList(extracted2grams));
+                        }
+
+
                     }
-
-
                 }
 
                 biBCapRecord.addAllSimpleBagOfWordTerms( rakeKeyWordsAndSimpleTokens.get(1) );
@@ -245,11 +248,15 @@ public class BibCapParser {
 
                     record.addExtractedTerm(s);
 
-                    if(Ngram.countWords(s) > 2) {
+                    if(useNgram) {
 
-                        String[] extracted2grams = Ngram.wordNgrams(s,2);
+                        if (Ngram.countWords(s) > 2) {
 
-                        record.addAllExtractedTerms( Arrays.asList(extracted2grams) );
+                            String[] extracted2grams = Ngram.wordNgrams(s, 2);
+
+                            record.addAllExtractedTerms(Arrays.asList(extracted2grams));
+
+                        }
 
                     }
 

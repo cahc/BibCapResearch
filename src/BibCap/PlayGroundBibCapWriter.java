@@ -31,7 +31,9 @@ public class PlayGroundBibCapWriter {
 
         System.out.println("start parsing");
 
-        bibCapParser.parse(recordStore);
+        System.out.println("OBS! Not using n-grams");
+
+        bibCapParser.parse(recordStore, false);
 
         System.out.println("Done. That took: " + (System.currentTimeMillis()-start)/1000.0 + ". Now writing to file");
 
@@ -52,6 +54,7 @@ public class PlayGroundBibCapWriter {
         problematicUTs.add("000272998000008");
         problematicUTs.add("000270754400012");
 
+        //TODO and add those UT:s that are not in the 2018 citation update. 
 
         for (Integer key : bibCapParser.getKeySet() ) {
 
