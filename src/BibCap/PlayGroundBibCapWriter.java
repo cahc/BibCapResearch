@@ -54,7 +54,13 @@ public class PlayGroundBibCapWriter {
         problematicUTs.add("000272998000008");
         problematicUTs.add("000270754400012");
 
-        //TODO and add those UT:s that are not in the 2018 citation update. 
+        //TODO and add those UT:s that are not in the 2018 citation update.
+        //here thay are!
+
+        problematicUTs.add("000282630200001");
+        problematicUTs.add("000282630200002");
+        problematicUTs.add("000282630200003");
+
 
         for (Integer key : bibCapParser.getKeySet() ) {
 
@@ -62,7 +68,7 @@ public class PlayGroundBibCapWriter {
 
             if(!record.isConsideredRecord()) {recordStore.remove(key) ; continue; }
 
-            if(problematicUTs.contains( record.getUT() )) { recordStore.remove(key); System.out.println("1 of the 4 problmatic records removed"); continue;  }
+            if(problematicUTs.contains( record.getUT() )) { recordStore.remove(key); System.out.println("1 of the 7 problmatic records removed"); continue;  }
 
            // writer.write(record.toString());
           //  writer.newLine();

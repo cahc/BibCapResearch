@@ -38,7 +38,7 @@ public class BibCapParser {
     File abstracts;
 
     File subjectCategories;
-
+    File clusterAndNewCitation;
 
     //for the persistence stores..
     private final static Set<Integer> orderedKeySet = new TreeSet<Integer>();
@@ -53,8 +53,7 @@ public class BibCapParser {
 
 
 
-
-    public BibCapParser(String publFile, String citedRefsFile, String abstractsFile, String citationDataFile) throws IOException {
+    public BibCapParser(String publFile, String citedRefsFile, String abstractsFile, String citationDataFile, String update) throws IOException {
 
         //Doc_id	UT	Title	Source	TC(inc self cit) TC(exl self cit)
 
@@ -69,12 +68,15 @@ public class BibCapParser {
         //UT	WCs
         this.subjectCategories = new File(citationDataFile);
 
+        //KTH clustering + new citation data
+
+        this.clusterAndNewCitation = new File(update);
 
         if(!this.publ.exists()) throw new IOException("publFile missing..");
         if(!this.citedRefs.exists()) throw new IOException("citedRefs missing..");
         if(!this.abstracts.exists()) throw new IOException("abstracts missing..");
         if(!this.subjectCategories.exists()) throw new IOException("subCats missing..");
-
+        if(!this.subjectCategories.exists()) throw new IOException("kth clustering missing..");
 
     }
 
@@ -89,7 +91,7 @@ public class BibCapParser {
     public BibCapParser() throws IOException {
 
 
-        this("DATA//publ.txt","DATA//cited_refs.txt","DATA//abstracts.txt","DATA//WCs.txt");
+        this("DATA//publ.txt","DATA//cited_refs.txt","DATA//abstracts.txt","DATA//WCs.txt","DATA//cit_class_au_2008_updatePlusCluster.txt");
 
     }
 
@@ -108,6 +110,8 @@ public class BibCapParser {
         System.out.println("Getting doc_id, UT, title and source and citations in pass one..");
         System.out.println("Running custom RAKE keyword extraction algorithm on title");
         BufferedReader reader = new BufferedReader(new FileReader(this.publ));
+
+        HashMap<Integer,String> kthIDtoUT = new HashMap<>();
 
         boolean firstline = true;
         String line;
@@ -128,6 +132,7 @@ public class BibCapParser {
             int TC_with_self_cit = Integer.valueOf(splitted[4]);
             int TC_without_seld_cit = Integer.valueOf(splitted[5]);
 
+            kthIDtoUT.put(doc_id,UT);
 
 
             BibCapRecord biBCapRecord = new BibCapRecord();
@@ -496,6 +501,27 @@ public class BibCapParser {
 
 
             }
+
+
+        }
+
+
+
+        System.out.println("2018 citation update + cluster in pass 5");
+
+        reader = new BufferedReader(new FileReader(this.clusterAndNewCitation));
+
+        //TODO read in
+        //UT	C_sciwo	C_scxwo	cluster_lev1_RC	cluster_lev2_RC	cluster_lev3_RC	cluster_lev4_RC	Doc_id	Author_id	Name	Last_name	First_name
+
+        Map<String,String>  UTtoUpdate = new HashMap<>();
+
+        for(Integer id : orderedKeySet) {
+
+            String UT = kthIDtoUT.get(id);
+            if(UT == null) {System.out.println("Catastrophic failure"); System.exit(0); }
+
+
 
 
         }
