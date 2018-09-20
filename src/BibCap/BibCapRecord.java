@@ -37,6 +37,53 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     int citationsExclSelf;
 
 
+    int clusterL1;
+    int clusterL2;
+    int clusterL3;
+    int clusterL4;
+
+    String firstAuthor;
+
+    public int getClusterL1() {
+        return clusterL1;
+    }
+
+    public void setClusterL1(int clusterL1) {
+        this.clusterL1 = clusterL1;
+    }
+
+    public int getClusterL2() {
+        return clusterL2;
+    }
+
+    public void setClusterL2(int clusterL2) {
+        this.clusterL2 = clusterL2;
+    }
+
+    public int getClusterL3() {
+        return clusterL3;
+    }
+
+    public void setClusterL3(int clusterL3) {
+        this.clusterL3 = clusterL3;
+    }
+
+    public int getClusterL4() {
+        return clusterL4;
+    }
+
+    public void setClusterL4(int clusterL4) {
+        this.clusterL4 = clusterL4;
+    }
+
+    public String getFirstAuthor() {
+        return firstAuthor;
+    }
+
+    public void setFirstAuthor(String firstAuthor) {
+        this.firstAuthor = firstAuthor;
+    }
+
     List<String> subjectCategories;
 
     public BibCapRecord() {}
@@ -46,7 +93,7 @@ public class BibCapRecord implements Serializable, DataType, Comparable<BibCapRe
     public String toString() {
 
 
-        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms +"\t" + subjectCategories +"\t" + simpleBagOfWordTokens;
+        return internalId +"\t" + UT +"\t" + title +"\t" +abstractText + "\t" + this.getNrCitedReferences() + "\t" + bibCapCitedReference +"\t" + source +"\t" +citationsIncSelf +"\t" + citationsExclSelf + "\t" +extractedTerms +"\t" + subjectCategories +"\t" + simpleBagOfWordTokens +"\t" + clusterL1 +"\t" + clusterL2 +"\t" + clusterL3 +"\t" + clusterL4 +"\t" + firstAuthor;
 
     }
 

@@ -111,7 +111,7 @@ public class BibCapParser {
         System.out.println("Running custom RAKE keyword extraction algorithm on title");
         BufferedReader reader = new BufferedReader(new FileReader(this.publ));
 
-        HashMap<Integer,String> kthIDtoUT = new HashMap<>();
+      //  HashMap<Integer,String> kthIDtoUT = new HashMap<>();
 
         boolean firstline = true;
         String line;
@@ -132,7 +132,7 @@ public class BibCapParser {
             int TC_with_self_cit = Integer.valueOf(splitted[4]);
             int TC_without_seld_cit = Integer.valueOf(splitted[5]);
 
-            kthIDtoUT.put(doc_id,UT);
+          //  kthIDtoUT.put(doc_id,UT);
 
 
             BibCapRecord biBCapRecord = new BibCapRecord();
@@ -475,7 +475,6 @@ public class BibCapParser {
         HashSet<Integer> countConsideredArticles = new HashSet<>();
 
 
-
         for(Integer key : orderedKeySet ) {
 
             bibCapRecord = bibCapRecordStore.getRecord(key);
@@ -508,21 +507,108 @@ public class BibCapParser {
 
 
         System.out.println("2018 citation update + cluster in pass 5");
-
+        HashSet<String> ignoreThese = new HashSet<>();
+        ignoreThese.add("000282630200001");
+        ignoreThese.add("000282630200002");
+        ignoreThese.add("000282630200003");
         reader = new BufferedReader(new FileReader(this.clusterAndNewCitation));
 
         //TODO read in
         //UT	C_sciwo	C_scxwo	cluster_lev1_RC	cluster_lev2_RC	cluster_lev3_RC	cluster_lev4_RC	Doc_id	Author_id	Name	Last_name	First_name
 
-        Map<String,String>  UTtoUpdate = new HashMap<>();
+        Map<String,String[]>  UTtoUpdate = new HashMap<>();
+
+        firstline = true;
+        while( (line = reader.readLine()) != null  ) {
+
+            if(firstline) {firstline=false; continue; }
+
+            String[] parts = line.split("\t");
+
+            UTtoUpdate.put(parts[0],parts);
+
+        }
+
+        reader.close();
 
         for(Integer id : orderedKeySet) {
 
-            String UT = kthIDtoUT.get(id);
-            if(UT == null) {System.out.println("Catastrophic failure"); System.exit(0); }
+            bibCapRecord = bibCapRecordStore.getRecord(id);
+            String UT = bibCapRecord.getUT();
+            if(ignoreThese.contains(UT)) continue; //UT in 2017 dump not in 2018 dump
+
+            String[] parts = UTtoUpdate.get(UT);
+            if(null == parts) {System.out.println("Catastrophic failure"); System.exit(0); }
+
+            //(0) UT	(1)C_sciwo	(2)C_scxwo	(3)cluster_lev1_RC	(4)cluster_lev2_RC	(5)cluster_lev3_RC	(6)cluster_lev4_RC	(7)Doc_id	(8)Author_id	(9)Name	(10)Last_name	(11)First_name
+
+            bibCapRecord.setCitationsIncSelf(  Integer.valueOf(parts[1]) );
+            bibCapRecord.setCitationsExclSelf(Integer.valueOf(parts[2]));
+
+            int l1 = -99;
+
+            try {
+
+                l1 = Integer.valueOf( parts[3] );
+
+            } catch (NumberFormatException e) {}
+
+
+            bibCapRecord.setClusterL1(l1);
+
+
+            int l2= -99;
+
+            try {
+
+                l2 = Integer.valueOf( parts[4] );
+
+            } catch (NumberFormatException e) {}
+
+
+            bibCapRecord.setClusterL2(l2);
+
+
+            int l3 = -99;
+
+            try {
+
+                l3 = Integer.valueOf( parts[5] );
+
+            } catch (NumberFormatException e) {}
+
+
+            bibCapRecord.setClusterL3(l3);
+
+            int l4 = -99;
+            try {
+
+                l4 = Integer.valueOf( parts[6] );
+
+            } catch (NumberFormatException e) {}
+
+
+            bibCapRecord.setClusterL4(l4);
+
+
+            if(parts.length == 8) {
+
+            bibCapRecord.setFirstAuthor("UNKNOWN");
+
+            } else if(parts.length < 12 ){
+
+                bibCapRecord.setFirstAuthor( parts[10] );
+
+            } else {
+
+                bibCapRecord.setFirstAuthor( parts[10] + ", " + parts[11]);
+
+            }
 
 
 
+
+            bibCapRecordStore.putRecord(id,bibCapRecord); //overwrite
 
         }
 
