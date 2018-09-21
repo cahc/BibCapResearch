@@ -110,8 +110,8 @@ public class ToClutoTerms {
             id++;
 
 
-
-            for(String term : bibCapRecord.getExtractedSimpleBagOfWordTokens() ) { //TODO warning only simple terms
+            //getExtractedSimpleBagOfWordTokens
+            for(String term : bibCapRecord.getExtractedTerms() ) { //TODO warning only complex terms
 
 
                 int dim =  termsToIndices.getInt( term );

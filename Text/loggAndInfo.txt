@@ -95,6 +95,13 @@ nnz (#non zero values): 31313038
 
 7. Now switch no linux and run knng --> see scripts *batch.sh
 
+#first order similarities, terms, l2 norm (i.e., cosine sim) and tf-idf scaled
+./knng -k=150 -alpha=6 -enh=10 -scale -norm=2 -ftmRead=clu -ftmWrite=clu l2knn simpleTermVectors.clu firstOrderSimpleTerms.clu
+./knng -k=150 -alpha=6 -enh=10 -scale -norm=2 -ftmRead=clu -ftmWrite=clu l2knn complexTermVectors.clu firstOrderComplexTerms.clu
+./knng -k=150 -alpha=6 -enh=10 -scale -norm=2 -ftmRead=clu -ftmWrite=clu l2knn simpleCitedRefVectors.clu firstOrderSimpleCitedRef.clu
+
+
+
 9. compare top docs..
 
 java -cp BibCapResearch.jar Experiments.SimChecker secondOrderSimCitedRefsK150.clu
