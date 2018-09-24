@@ -26,6 +26,16 @@ import java.util.*;
 public class BaseLineWoS {
 
 
+    public static double removeValue(double originalMean, double removeVale,double removeWeight, double totalWeight) {
+
+        return( ((originalMean*totalWeight)-removeVale) / (totalWeight-removeWeight) );
+
+    }
+
+
+
+
+
     static class FieldNorm {
 
         double citTimesFracSum = 0;
@@ -380,6 +390,8 @@ public class BaseLineWoS {
         System.out.println("Starting jaccardbased refvalculations calculations..");
 
         HashMap<Set<String>, Double> combosToRefValues = new HashMap<>();
+        HashMap<Set<String>, Double> combosToTotalWeights = new HashMap<>(); //for recal of weighted mean
+
         for(Map.Entry<Set<String>,IntOpenHashSet> entry : subCatCombosToPotentialRefDocs.entrySet() ) {
 
             Set<String>  subcatCombo = entry.getKey();
@@ -406,7 +418,12 @@ public class BaseLineWoS {
             for(int i=0; i<weights.length; i++) wightedCitationsSum = (weights[i]*citations[i])+wightedCitationsSum;
 
             combosToRefValues.put(subcatCombo,  (wightedCitationsSum/sumweights)  );
+            combosToTotalWeights.put(subcatCombo,sumweights);
         }
+
+        //TODO note that we are including the target doc in the refvalue cals,
+        //TODO this dosent matter much here in there big sets but for consistensy
+        //TODO we must remove this cit and its weight (which is 1) from the weigheted mean..
 
         //  for(Map.Entry<Set<String>,Double> fieldValue : combosToRefValues.entrySet()) {
 
@@ -423,7 +440,11 @@ public class BaseLineWoS {
 
            Double refvalue = combosToRefValues.get(record.getSubCats());
 
-           writer2.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" +refvalue +"\t" + record.getSubCats());
+           //todo refvalue2, a recalculation where record is not a part of the reference value
+
+           double refvalue2 = removeValue(refvalue,record.getCitationExclSefLog1p(),1,combosToTotalWeights.get(record.getSubCats()));
+
+           writer2.write(record.getUT() +"\t" + record.getCitationExclSefLog1p() +"\t" +refvalue +"\t" + refvalue2 +"\t" + record.getSubCats());
            writer2.newLine();
         }
 
@@ -441,7 +462,7 @@ public class BaseLineWoS {
             HashSet<Integer> docIdsInReferenceSet = new HashSet<>();
 
             for(String s : subcats) docIdsInReferenceSet.addAll( singleSubCatToDocIndex.get(s) );
-            //docIdsInReferenceSet.remove(i);  //don't include yourself
+            docIdsInReferenceSet.remove(i);  //don't include yourself
 
             //now we know which docids that have a positive weight, but not we don't know which weight..
 

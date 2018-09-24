@@ -112,7 +112,8 @@ java -cp BibCapResearch.jar Experiments.BaseLineWoS mappy.db
 
 10. run parameter search
 
-java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineSim mappy.db
+java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineSim mappy.db firstOrderSimpleCitedRef.clu firstOrderSimpleTerms.clu
+
 
 #contour in R
 parameterSearch <- read.table("ParameterSearch.txt")
