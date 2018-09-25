@@ -115,6 +115,11 @@ java -cp BibCapResearch.jar Experiments.BaseLineWoS mappy.db
 java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineSim mappy.db firstOrderSimpleCitedRef.clu firstOrderSimpleTerms.clu
 
 
+11. cluster refs
+
+java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineClusters
+
+
 #contour in R
 parameterSearch <- read.table("ParameterSearch.txt")
 View(parameterSearch)
