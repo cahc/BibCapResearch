@@ -114,6 +114,10 @@ java -cp BibCapResearch.jar Experiments.BaseLineWoS mappy.db
 
 java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineSim mappy.db firstOrderSimpleCitedRef.clu firstOrderSimpleTerms.clu
 
+11. run specific
+
+java -Xmx11g -cp BibCapResearch.jar Experiments.BaseLineItemOrientedSpecific mappy.db firstOrderSimpleCitedRef.clu firstOrderSimpleTerms.clu 0.7 15
+
 
 11. cluster refs
 
